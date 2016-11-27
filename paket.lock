@@ -1,0 +1,3 @@
+NUGET
+  remote: http://api.nuget.org/v3/index.json
+    Newtonsoft.Json (9.0.1) - framework: >= net452

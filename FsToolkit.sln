@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsToolkit.Json", "FsToolkit.Json\FsToolkit.Json.fsproj", "{C8124BBB-D016-4163-B26E-29FDF4A7FB5B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{63391FEF-35D9-4170-ABEA-23573849A0E8}"
+	ProjectSection(SolutionItems) = preProject
+		paket.dependencies = paket.dependencies
+		paket.lock = paket.lock
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C8124BBB-D016-4163-B26E-29FDF4A7FB5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8124BBB-D016-4163-B26E-29FDF4A7FB5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8124BBB-D016-4163-B26E-29FDF4A7FB5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8124BBB-D016-4163-B26E-29FDF4A7FB5B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
