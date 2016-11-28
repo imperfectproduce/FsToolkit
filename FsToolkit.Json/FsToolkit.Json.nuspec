@@ -9,4 +9,7 @@
 		<dependency id="Newtonsoft.Json" version="9.0.1" />
 	</dependencies>
   </metadata>
+  <files>
+    <file src="bin\Release\FsToolkit.Json.dll" target="lib" /> 
+  </files>
 </package>
