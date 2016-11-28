@@ -69,7 +69,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="JsonConverters.fs" />
+    <Compile Include="Converters.fs" />
+    <Compile Include="Serialization.fs" />
     <None Include="FsToolkit.Json.nuspec" />
   </ItemGroup>
   <ItemGroup>
