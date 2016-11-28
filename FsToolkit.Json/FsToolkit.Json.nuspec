@@ -10,6 +10,6 @@
 	</dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\FsToolkit.Json.dll" target="lib" /> 
+    <file src="bin\Release\FsToolkit.Json.dll" target="lib\net452" /> 
   </files>
 </package>
