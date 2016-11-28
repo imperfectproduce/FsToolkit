@@ -2,11 +2,11 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>FsToolkit.Json</id>
-    <version>1.0.0</version>
+    <version>1.0.$build_number$</version>
     <description>Json helpers, mostly built on top of Newtonsoft.Json</description>
     <authors>Relay Foods</authors>
 	<dependencies>
-		<dependency id="Newtonsoft.Json" version="9.0.1" />
+		<dependency id="Newtonsoft.Json" version="9" />
 	</dependencies>
   </metadata>
   <files>
