@@ -6,7 +6,7 @@ NuGet package feed: https://ci.appveyor.com/nuget/fstoolkit-json
 
 ##FsToolkit.Json.Linq
 
-Features a `(?)` implementation (dynamic operator) that makes manipulating pared `JObject`s super easy
+Features a `(?)` implementation (dynamic operator) that makes manipulating parsed `JObject`s super easy
   - Handles `null` and missing properties the same
   - null-safe nested property navigation
   - `null` return values safe to use with value types (uses `Unchecked.defaultof<'t>`)
