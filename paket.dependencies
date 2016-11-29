@@ -1,2 +1,6 @@
+framework: auto-detect
 source https://api.nuget.org/v3/index.json
-nuget Newtonsoft.Json framework: >= net452
+
+nuget Newtonsoft.Json
+nuget NUnit
+nuget Unquote

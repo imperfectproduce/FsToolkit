@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		paket.lock = paket.lock
 	EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsToolkit.Json.Tests", "FsToolkit.Json.Tests\FsToolkit.Json.Tests.fsproj", "{B7DB418F-DD7D-46F1-A072-FBD9BBB16889}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C8124BBB-D016-4163-B26E-29FDF4A7FB5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8124BBB-D016-4163-B26E-29FDF4A7FB5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8124BBB-D016-4163-B26E-29FDF4A7FB5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7DB418F-DD7D-46F1-A072-FBD9BBB16889}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7DB418F-DD7D-46F1-A072-FBD9BBB16889}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7DB418F-DD7D-46F1-A072-FBD9BBB16889}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7DB418F-DD7D-46F1-A072-FBD9BBB16889}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
