@@ -93,6 +93,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="LinqTests.fs" />
     <Content Include="App.config" />
+    <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
