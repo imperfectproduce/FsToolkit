@@ -77,3 +77,29 @@ module LinqTests =
         let json = JObject.Parse """{ hello: null }"""
         let actual: Test2 = json?hello
         test <@ actual = null @>
+
+    [<Test>]
+    let ``list of values`` () =
+        let json = JObject.Parse """{ hello: [1,2,3] }"""
+        test <@ json?hello = [1;2;3] @>
+
+    [<Test>]
+    let ``filter list of values`` () =
+        let json = JObject.Parse """{ hello: [1,2,3] }"""
+        test <@ json?hello |> List.filter (fun x -> x > 1) = [2;3] @>
+
+    [<Test>]
+    let ``seq of values`` () =
+        let json = JObject.Parse """{ hello: [1,2,3] }"""
+        test <@ json?hello |> Seq.tryHead = Some 1 @>
+
+    [<Test>]
+    let ``list of objects`` () =
+        let json = JObject.Parse """{ hello: [{ Prop1: "a", Prop2: 3 }] }"""
+        test <@ json?hello = [{Prop1="a"; Prop2=3}] @>
+
+    [<Test>]
+    let ``seq of json objects`` () =
+        let json = JObject.Parse """{ hello: [{ Prop1: "a", Prop2: 3 }, { Prop1: "b", Prop2: 4 }] }"""
+        test <@ json?hello |> Seq.map (fun j -> j?Prop1) |> Seq.toList = ["a";"b"] @>
+
