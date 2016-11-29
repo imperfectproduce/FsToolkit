@@ -5,7 +5,7 @@
 # FsToolkit
 FSharp Toolkit - helpful packages for everyday F# programming
 
-Requires VS 2015 with Paket extension installed (for package restore on build).
+Requires VS 2015 with Paket (for package restore on build) and NUnit 3 Test Adapter (for running tests) extensions installed.
 
 All packages target `net452`. There is one `.nuspec` file per project in the solution (each project is a package).
 
