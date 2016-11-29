@@ -2,6 +2,8 @@
 
 Various helpers that make working with JSON easier using F#. Built on top of Newtonsoft.Json
 
+NuGet package feed: https://ci.appveyor.com/nuget/fstoolkit-json
+
 ##FsToolkit.Json.Linq
 
 Features a `(?)` implementation (dynamic operator) that makes manipulating pared `JObject`s super easy
