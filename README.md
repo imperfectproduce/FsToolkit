@@ -1,3 +1,7 @@
+[FsToolkit.Json](https://github.com/relayfoods/FsToolkit/tree/master/FsToolkit.Json)
+
+---
+
 # FsToolkit
 FSharp Toolkit - helpful packages for everyday F# programming
 
