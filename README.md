@@ -16,7 +16,7 @@ Packages are automatically published to AppVeyor project feeds with version patt
 
 Major and Minor numbers should be manually incremented in `.nuspec` files by developers as appropriate.
 
-The following are the package feeds:
+The following are the public, per-project package feeds:
   - https://ci.appveyor.com/nuget/fstoolkit-json
 
-Packages are also published to RelayFoods' private account feed https://ci.appveyor.com/nuget/relayfoods
+Packages are also all published to RelayFoods' private account feed https://ci.appveyor.com/nuget/relayfoods
