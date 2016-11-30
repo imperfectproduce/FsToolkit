@@ -18,3 +18,5 @@ Major and Minor numbers should be manually incremented in `.nuspec` files by dev
 
 The following are the package feeds:
   - https://ci.appveyor.com/nuget/fstoolkit-json
+
+Packages are also published to RelayFoods' private account feed https://ci.appveyor.com/nuget/relayfoods
