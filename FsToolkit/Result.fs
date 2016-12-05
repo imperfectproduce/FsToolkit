@@ -10,7 +10,7 @@ module Result =
         match r with
         | Success x -> f(x)
         | Failure x -> Failure x
-    let (>>=) f r = bind f r
+    let (>>=) f r = bind r f
 
     let switch f x = 
         f x |> Success
@@ -27,7 +27,7 @@ module AsyncResult =
         | Success x -> return! f(x)
         | Failure x -> return Failure x
     }
-    let (>>=) a b = bind b a
+    let (>>=) f r = bind r f
 
     let map f r = async {
         let! r = r
