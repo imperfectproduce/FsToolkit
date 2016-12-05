@@ -5,8 +5,6 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module Auto = 
-    /// True if s is null or whitespace.
-    let inline isEmpty s = String.IsNullOrWhiteSpace(s)
     ///Coalesce option value
     let inline (|?) x y = defaultArg x y
     ///Coalesce null value
@@ -28,6 +26,9 @@ module Auto =
             None
 
     module String =
+        /// True if s is null or whitespace.
+        let inline isEmpty s = String.IsNullOrWhiteSpace(s)
+
         /// Trims a string, returning None if string is null or whitespace.
         let trimToOption str =
             if isEmpty str then None

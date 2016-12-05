@@ -53,6 +53,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Auto.fs" />
     <Compile Include="Config.fs" />
+    <Compile Include="Result.fs" />
     <None Include="FsToolkit.nuspec" />
   </ItemGroup>
   <ItemGroup>
