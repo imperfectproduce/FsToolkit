@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>FsToolkit</id>
-    <version>1.0.$build_number$</version>
+    <version>2.0.$build_number$</version>
     <description>Basic helpers with no dependencies</description>
     <authors>Relay Foods</authors>
 	<licenseUrl>https://raw.githubusercontent.com/relayfoods/FsToolkit/master/LICENSE</licenseUrl>
