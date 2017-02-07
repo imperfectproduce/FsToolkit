@@ -49,4 +49,7 @@ module Linq =
                     let value = jn.ToObject(optionOf)
                     FSharpValue.MakeUnion (cases.[1], [| value |]) :?> 't
                 else
-                    jn.ToObject<'t>()
+                    if jn.GetType() = typeof<'t> then
+                        jn :> obj :?> 't
+                    else
+                        jn.ToObject<'t>()

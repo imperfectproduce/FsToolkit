@@ -104,10 +104,9 @@ module LinqTests =
         test <@ json?hello |> Seq.map (fun j -> j?Prop1) |> Seq.toList = ["a";"b"] @>
 
     [<Test>]
-    [<Ignore("not implemented")>]
     let ``objects in list not copied on iterating`` () =
         let json = JObject.Parse """{ hello: [{ Prop1: "a", Prop2: 3 }, { Prop1: "b", Prop2: 4 }] }"""
-        let xl = json?hello |> List.map id
-        let yl = json?hello |> List.map id
+        let xl = (json?hello : JArray) |> Seq.map id |> Seq.toList
+        let yl = (json?hello : JArray) |> Seq.map id |> Seq.toList
         test <@ xl = yl @>
 
