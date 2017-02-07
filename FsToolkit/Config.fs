@@ -36,7 +36,7 @@ module Config =
 
     ///Get config setting, looking in app settings, environment variables, and 'secrets.ini' in that order.
     ///Fails hard if not found.
-    let getSetting (name: string) =
+    let tryGetSetting (name: string) =
         let cs = 
             [getAppSetting
              getEnvironmentVariable
@@ -45,6 +45,10 @@ module Config =
              getIniSetting AppDomain.CurrentDomain.BaseDirectory "secrets.ini"
              getIniSetting Environment.CurrentDirectory "secrets.ini"]
             |> Seq.tryPick (fun getter -> getter(name))
-        match cs with
+        cs
+
+    ///Get config setting, looking in app settings, environment variables, and 'secrets.ini' in that order.
+    let getSetting name = 
+        match tryGetSetting name with
         | Some cs -> cs
         | None -> failwithf "Config setting '%s' not found" name

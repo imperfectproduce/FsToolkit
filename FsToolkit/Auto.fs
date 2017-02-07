@@ -25,6 +25,9 @@ module Auto =
         else 
             None
 
+    let utf8_bytes (text:string) = System.Text.UTF8Encoding(false).GetBytes(text)
+    let utf8_string (bytes:byte[]) = System.Text.UTF8Encoding(false).GetString(bytes)
+
     module String =
         /// True if s is null or whitespace.
         let inline isEmpty s = String.IsNullOrWhiteSpace(s)
