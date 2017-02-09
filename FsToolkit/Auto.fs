@@ -24,9 +24,14 @@ module Auto =
             Some o
         else 
             None
+    
+    let inline aprintfn fmt = 
+        Printf.ksprintf (Console.Out.WriteLineAsync>>Async.AwaitTask) fmt
 
-    let utf8_bytes (text:string) = System.Text.UTF8Encoding(false).GetBytes(text)
-    let utf8_string (bytes:byte[]) = System.Text.UTF8Encoding(false).GetString(bytes)
+    module UTF8 = 
+        ///String to bytes (utf-8 no BOM)
+        let toBytes (text:string) = System.Text.UTF8Encoding(false).GetBytes(text)
+        let toString (bytes:byte[]) = System.Text.UTF8Encoding(false).GetString(bytes)
 
     module String =
         /// True if s is null or whitespace.
