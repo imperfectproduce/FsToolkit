@@ -1,4 +1,4 @@
-FRAMEWORK: NET452
+FRAMEWORK: NET451
 NUGET
   remote: https://api.nuget.org/v3/index.json
     Newtonsoft.Json (9.0.1)
