@@ -2,5 +2,6 @@ FRAMEWORK: NET452
 NUGET
   remote: https://api.nuget.org/v3/index.json
     Newtonsoft.Json (9.0.1)
-    NUnit (3.5)
+    Npgsql (3.1.9)
+    NUnit (3.6)
     Unquote (3.1.2)

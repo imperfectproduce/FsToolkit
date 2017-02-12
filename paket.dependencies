@@ -1,6 +1,7 @@
-framework: auto-detect
+framework: net452
 source https://api.nuget.org/v3/index.json
 
 nuget Newtonsoft.Json
+nuget Npgsql ~> 3.1.9
 nuget NUnit
 nuget Unquote
