@@ -1,7 +1,7 @@
-framework: net451
 source https://api.nuget.org/v3/index.json
+framework >= net452
 
 nuget Newtonsoft.Json
-nuget Npgsql ~> 3.1.9
-nuget NUnit
+nuget Npgsql 3.1.9
+nuget NUnit 3.5
 nuget Unquote
