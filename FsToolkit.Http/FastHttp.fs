@@ -31,7 +31,16 @@ module FastHttp =
     //don't limit number of http connections
     do System.Net.ServicePointManager.DefaultConnectionLimit <- Int32.MaxValue
     //take advantage singleton built-in socket pooling
-    let client = new HttpClient()
+
+    let handler = new HttpClientHandler()
+    do
+        handler.AllowAutoRedirect <- false
+        handler.UseCookies <- false
+        handler.UseDefaultCredentials <- true
+        handler.AutomaticDecompression <- handler.AutomaticDecompression ||| DecompressionMethods.GZip
+        handler.AutomaticDecompression <- handler.AutomaticDecompression ||| DecompressionMethods.Deflate
+
+    let client = new HttpClient(handler)
 
     let sendAsync fastRequest = async {
         use request = new HttpRequestMessage()
