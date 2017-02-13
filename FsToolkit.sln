@@ -17,6 +17,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsToolkit", "FsToolkit\FsTo
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsToolkit.Postgres", "FsToolkit.Postgres\FsToolkit.Postgres.fsproj", "{191F74A6-57D3-4E3D-AFA3-3FA53A305857}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsToolkit.Http", "FsToolkit.Http\FsToolkit.Http.fsproj", "{7359DEF4-720A-4173-A061-0C84C99F5853}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{191F74A6-57D3-4E3D-AFA3-3FA53A305857}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{191F74A6-57D3-4E3D-AFA3-3FA53A305857}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{191F74A6-57D3-4E3D-AFA3-3FA53A305857}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7359DEF4-720A-4173-A061-0C84C99F5853}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7359DEF4-720A-4173-A061-0C84C99F5853}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7359DEF4-720A-4173-A061-0C84C99F5853}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7359DEF4-720A-4173-A061-0C84C99F5853}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

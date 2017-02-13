@@ -4,13 +4,16 @@ open System
 open System.Net
 open System.Net.Http
 open System.Net.Http.Headers
+open System.Threading
 
 type FastRequest = {
     Method : string
     Url: string
     Headers : (string * string) list
     Body : string
+    Timeout : TimeSpan
 } with 
+    ///Default fast request: GET | http://example.com | JSON | no body | timeout = 12s
     static member Default = {
         Method = "GET" 
         Url = "http://example.org"
@@ -19,6 +22,7 @@ type FastRequest = {
               ("accept", "application/json, text/html, text/plain, application/xml, application/xhtml+xml") 
               ("Accept-Encoding", "gzip, deflate") ]
         Body = null
+        Timeout = TimeSpan.FromSeconds(12.)
     }
 
 type FastResponse = {
@@ -27,6 +31,7 @@ type FastResponse = {
     Body : string
 }
 
+[<AutoOpen>]
 module FastHttp =
     //don't limit number of http connections
     do System.Net.ServicePointManager.DefaultConnectionLimit <- Int32.MaxValue
@@ -60,7 +65,8 @@ module FastHttp =
             | None ->
                 request.Content.Headers.ContentType <- new MediaTypeHeaderValue("application/json")
 
-        use! response = client.SendAsync(request) |> Async.AwaitTask
+        let cts = new CancellationTokenSource(fastRequest.Timeout.TotalMilliseconds |> int)
+        use! response = client.SendAsync(request, cts.Token) |> Async.AwaitTask
         let! responseBody = response.Content.ReadAsStringAsync() |> Async.AwaitTask
         let responseHeaders =
             response.Headers // does this include the content header?
