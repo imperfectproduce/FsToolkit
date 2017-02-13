@@ -11,7 +11,10 @@ type FastRequest = {
     Url: string
     Headers : (string * string) list
     Body : string
+    ///The request / response timeout (ignored if an CancellationToken is given)
     Timeout : TimeSpan
+    ///The optional CancellationToken (Timeout is ignored if given)
+    CancellationToken : CancellationToken option
 } with 
     ///Default fast request: GET | http://example.com | JSON | no body | timeout = 12s
     static member Default = {
@@ -23,6 +26,7 @@ type FastRequest = {
               ("Accept-Encoding", "gzip, deflate") ]
         Body = null
         Timeout = TimeSpan.FromSeconds(12.)
+        CancellationToken = None
     }
 
 type FastResponse = {
@@ -31,7 +35,6 @@ type FastResponse = {
     Body : string
 }
 
-[<AutoOpen>]
 module FastHttp =
     //don't limit number of http connections
     do System.Net.ServicePointManager.DefaultConnectionLimit <- Int32.MaxValue
@@ -65,17 +68,19 @@ module FastHttp =
             | None ->
                 request.Content.Headers.ContentType <- new MediaTypeHeaderValue("application/json")
 
-        let cts = new CancellationTokenSource(fastRequest.Timeout.TotalMilliseconds |> int)
-        use! response = client.SendAsync(request, cts.Token) |> Async.AwaitTask
+        let ct = 
+            match fastRequest.CancellationToken with
+            | Some ct -> ct
+            | _ ->
+                let cts = new CancellationTokenSource(fastRequest.Timeout.TotalMilliseconds |> int)
+                cts.Token
+
+        use! response = client.SendAsync(request, ct) |> Async.AwaitTask
         let! responseBody = response.Content.ReadAsStringAsync() |> Async.AwaitTask
         let responseHeaders =
             response.Headers // does this include the content header?
             |> Seq.map (|KeyValue|)
-            |> Seq.map (fun (k,v) ->
-                //or maybe join the values with '; '?
-                match v |> Seq.tryHead with
-                | Some(v) -> k, v            
-                | None -> k, "")
+            |> Seq.map (fun (k,v) -> k, String.Join(", ", v))
             |> Seq.toList
 
         return {
