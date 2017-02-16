@@ -24,6 +24,11 @@ module LinqTests =
         test <@ json?hello = 0 @>
 
     [<Test>]
+    let ``get missing value type property bool`` () =
+        let json = JObject.Parse """{ }"""
+        test <@ json?hello = true |> not @>
+
+    [<Test>]
     let ``get missing value type property of option type`` () =
         let json = JObject.Parse """{ }"""
         test <@ json?hello = (None:int option) @>
