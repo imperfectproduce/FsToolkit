@@ -53,3 +53,8 @@ module Linq =
                         jn :> obj :?> 't
                     else
                         jn.ToObject<'t>()
+
+    ///Helper for creating Maps of string * obj for serialization to json
+    ///e.g. `dict [P("key1" 2); P("key2", "value")]`
+    let J x y = x.ToString(), y :> obj
+
