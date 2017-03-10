@@ -41,7 +41,9 @@ type FastResponse = {
     StatusCode : int
     Headers : (string * string) list
     Body : string
-}
+} with
+    member this.IsSuccessStatusCode =
+        this.StatusCode >= 200 && this.StatusCode <= 299
 
 module FastHttp =
     //don't limit number of http connections
