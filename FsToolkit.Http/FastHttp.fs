@@ -23,7 +23,7 @@ type FastRequest = {
     ///Indicates whether or not UTF-8 BOM should be include when encoding / decoding utf-8 charset content
     IncludeUtf8Bom : bool
 } with 
-    ///Default fast request: GET | http://example.com | JSON | no body | timeout = 12s
+    ///Default fast request: GET | http://example.com | JSON | no body | timeout = 60s
     static member Default = {
         Method = "GET" 
         Url = "http://example.org"
@@ -32,7 +32,7 @@ type FastRequest = {
               ("accept", "application/json, text/html, text/plain, application/xml, application/xhtml+xml") 
               ("Accept-Encoding", "gzip, deflate") ]
         Body = null
-        Timeout = TimeSpan.FromSeconds(12.)
+        Timeout = TimeSpan.FromSeconds(60.)
         CancellationToken = None
         IncludeUtf8Bom = false
     }
