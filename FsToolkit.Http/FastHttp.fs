@@ -38,15 +38,26 @@ type FastRequest = {
     }
 
 type FastResponse = {
+    RequestUrl : string
     StatusCode : int
     Headers : (string * string) list
     Body : string
-}
+} with 
+    override this.ToString() =
+        sprintf "{ FastResponse.RequestUrl=%s; StatusCode=%i; Body=%s }" this.RequestUrl this.StatusCode this.Body
+    member this.Is2xx =
+        this.StatusCode >= 200 && this.StatusCode <= 299
+    member this.Fail() =
+        let msg = sprintf "The remote server returned an error: %i.  Response from %s: %s" this.StatusCode this.RequestUrl this.Body
+        raise <| HttpRequestException(msg)
+    member this.Ensure2xx() =
+        if this.Is2xx |> not then
+            this.Fail()
 
 [<AutoOpen>]
 module ResponsePatterns =
-    let (|Status2xx|_|) response =
-        if response.StatusCode >= 200 && response.StatusCode <= 299 
+    let (|Status2xx|_|) (response:FastResponse) =
+        if response.Is2xx 
         then Some response
         else None
 
@@ -82,7 +93,7 @@ module FastHttp =
 
     let private utf8Encoding includeBom = UTF8Encoding(includeBom) :> Encoding
 
-    let createRequestContent (fastRequest:FastRequest) =
+    let private createRequestContent (fastRequest:FastRequest) =
         let ct = fastRequest.Headers |> Seq.tryFind (fun (k,v) -> k.ToLower() = "content-type")
         match ct with
         | Some(_,ct) ->
@@ -128,6 +139,7 @@ module FastHttp =
             |> Seq.toList
 
         return {
+            RequestUrl = request.RequestUri.ToString()
             StatusCode = response.StatusCode |> int
             Headers = responseHeaders
             Body = responseBody
