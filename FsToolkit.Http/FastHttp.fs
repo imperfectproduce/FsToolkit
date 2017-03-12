@@ -92,13 +92,16 @@ module FastHttp =
         client
 
     let private utf8Encoding includeBom = UTF8Encoding(includeBom) :> Encoding
+    open System.Text.RegularExpressions
+    let private charsetRegex = 
+        Regex(@"(?<mime>[^;]*)(;\s*charset=(?<charset>.*))?", RegexOptions.Compiled ||| RegexOptions.CultureInvariant)
 
     let private createRequestContent (fastRequest:FastRequest) =
         let ct = fastRequest.Headers |> Seq.tryFind (fun (k,v) -> k.ToLower() = "content-type")
         match ct with
         | Some(_,ct) ->
-            let parts = System.Text.RegularExpressions.Regex.Match(ct, @"(?<mime>[^;]*)(;\s*charset=(?<charset>.*))?")
-            printfn "%A" parts
+            let parts = charsetRegex.Match(ct)
+            //printfn "%A" parts
             match parts.Groups.[2], parts.Groups.[3] with
             | mime, charset when mime.Success && charset.Success ->
                 let encoding =
