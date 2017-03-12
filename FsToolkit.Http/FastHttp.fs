@@ -15,8 +15,9 @@ open System.Text.RegularExpressions
 
 type FastRequest = {
     Method : string
+    ///The Url (query string params overwritten if Query is non-empty)
     Url: string
-    ///(Unescaped) query string params (overwrites any on Url if non-Empty)
+    ///The (unescaped) query string params (if non-empty overwrites Url query string params)
     Query : (string * string) list
     Headers : (string * string) list
     Body : string
