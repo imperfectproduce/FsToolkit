@@ -10,10 +10,14 @@ open System.Text.RegularExpressions
 
 //TODO
 // - query params
+// - elapsed property
+// - content-type headers for response
 
 type FastRequest = {
     Method : string
     Url: string
+    ///(Unescaped) query string params (overwrites any on Url if non-Empty)
+    Query : (string * string) list
     Headers : (string * string) list
     Body : string
     ///The request / response timeout (ignored if an CancellationToken is given)
@@ -27,6 +31,7 @@ type FastRequest = {
     static member Default = {
         Method = "GET" 
         Url = "http://example.org"
+        Query = []
         Headers = 
             [ ("content-type", "application/json; charset=utf-8") 
               ("accept", "application/json, text/html, text/plain, application/xml, application/xhtml+xml") 
@@ -117,7 +122,16 @@ module FastHttp =
 
     let sendAsync fastRequest = async {
         use request = new HttpRequestMessage()
-        request.RequestUri <- Uri(fastRequest.Url)
+        request.RequestUri <- 
+            let builder = UriBuilder(fastRequest.Url)
+            if fastRequest.Query <> [] then
+                let qs = 
+                    fastRequest.Query 
+                    |> Seq.map (fun (k,v) -> 
+                        sprintf "%s=%s" (Uri.EscapeDataString k) (Uri.EscapeDataString v))
+                builder.Query <- String.Join("&", qs)
+            builder.Uri
+
         request.Method <- HttpMethod(fastRequest.Method)
         for (k,v) in fastRequest.Headers do
             if ["content-type"] |> Seq.contains (k.ToLower()) |> not then
@@ -142,7 +156,7 @@ module FastHttp =
             |> Seq.toList
 
         return {
-            RequestUrl = request.RequestUri.ToString()
+            RequestUrl = request.RequestUri.AbsoluteUri
             StatusCode = response.StatusCode |> int
             Headers = responseHeaders
             Body = responseBody
