@@ -41,25 +41,44 @@ type FastResponse = {
     StatusCode : int
     Headers : (string * string) list
     Body : string
-} with
-    member this.IsSuccessStatusCode =
-        this.StatusCode >= 200 && this.StatusCode <= 299
+}
+
+[<AutoOpen>]
+module ResponsePatterns =
+    let (|Status2xx|_|) response =
+        if response.StatusCode >= 200 && response.StatusCode <= 299 
+        then Some response
+        else None
+
+    let (|Status400|_|) response =
+        if response.StatusCode = 400
+        then Some response
+        else None
 
 module FastHttp =
-    //don't limit number of http connections
-    do System.Net.ServicePointManager.DefaultConnectionLimit <- Int32.MaxValue
-    do System.Net.ServicePointManager.Expect100Continue <- false
-    //take advantage singleton built-in socket pooling
 
-    let private handler = new HttpClientHandler()
-    do
+    ///Apply global (ServicePointManager) optimizations: call this once at application startup.
+    let optimize () =
+        //don't limit number of http connections
+        System.Net.ServicePointManager.DefaultConnectionLimit <- Int32.MaxValue
+        //speeds up PUT and POST requests
+        System.Net.ServicePointManager.Expect100Continue <- false
+
+    ///Handler used by the HttpClient singleton
+    let handler = 
+        let handler = new HttpClientHandler()
         handler.AllowAutoRedirect <- false
         handler.UseCookies <- false
         handler.UseDefaultCredentials <- true
         handler.AutomaticDecompression <- DecompressionMethods.GZip ||| DecompressionMethods.Deflate
+        handler
 
-    let private client = new HttpClient(handler)
-    do client.DefaultRequestHeaders.ExpectContinue <- Nullable(false)
+    //HttpClient used for all requests (taking advantage singleton built-in socket pooling)
+    let client = 
+        let client = new HttpClient(handler)
+        //speeds up PUT and POST requests
+        client.DefaultRequestHeaders.ExpectContinue <- Nullable(false)
+        client
 
     let private utf8Encoding includeBom = UTF8Encoding(includeBom) :> Encoding
 
