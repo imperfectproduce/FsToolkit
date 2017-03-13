@@ -16,7 +16,7 @@ type FastRequest = {
     ///The Url (query string params overwritten if Query is non-empty)
     Url: string
     ///The (unescaped) query string params (if non-empty overwrites Url query string params)
-    Query : (string * string) list
+    QueryParams : (string * string) list
     Headers : (string * string) list
     Body : string
     ///The request / response timeout (ignored if an CancellationToken is given)
@@ -27,12 +27,14 @@ type FastRequest = {
     IncludeUtf8Bom : bool
     ///Indicates whether non-2xx response should fail with exception
     Ensure2xx : bool
+    ///Indicates whether query param keys and values should be escaped
+    EscapeQueryParams : bool
 } with 
-    ///Default fast request: GET | http://example.com | JSON | no body | timeout = 60s | Ensure2xx false
+    ///Default fast request: GET | http://example.com | JSON | no body | timeout = 60s | Ensure2xx false | EscapeQueryParams false
     static member Default = {
         Method = "GET" 
         Url = "http://example.org"
-        Query = []
+        QueryParams = []
         Headers = 
             [ ("content-type", "application/json; charset=utf-8") 
               ("accept", "application/json, text/html, text/plain, application/xml, application/xhtml+xml") 
@@ -42,6 +44,7 @@ type FastRequest = {
         CancellationToken = None
         IncludeUtf8Bom = false
         Ensure2xx = false
+        EscapeQueryParams = false
     }
 
 type FastResponse = {
@@ -126,11 +129,13 @@ module FastHttp =
         use request = new HttpRequestMessage()
         request.RequestUri <- 
             let builder = UriBuilder(fastRequest.Url)
-            if fastRequest.Query <> [] then
+            if fastRequest.QueryParams <> [] then
                 let qs = 
-                    fastRequest.Query 
+                    fastRequest.QueryParams
                     |> Seq.map (fun (k,v) -> 
-                        sprintf "%s=%s" (Uri.EscapeDataString k) (Uri.EscapeDataString v))
+                        if fastRequest.EscapeQueryParams 
+                        then sprintf "%s=%s" (Uri.EscapeDataString k) (Uri.EscapeDataString v)
+                        else sprintf "%s=%s" k v)
                 builder.Query <- String.Join("&", qs)
             builder.Uri
 
