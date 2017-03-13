@@ -51,11 +51,13 @@ type FastResponse = {
     StatusCode : int
     Headers : (string * string) list
     Body : string
+    ///A measure of the total time from begin sending request to end reading response
+    Elapsed : TimeSpan
 } with 
     member this.Is2xx =
         this.StatusCode >= 200 && this.StatusCode <= 299
     member this.Fail() =
-        let msg = sprintf "The remote server response was rejected by caller: %i.  Response from %s: %s" this.StatusCode this.RequestUrl this.Body
+        let msg = sprintf "The remote server response was rejected by caller: %i. Response from %s: %s" this.StatusCode this.RequestUrl this.Body
         raise <| HttpRequestException(msg)
     member this.Ensure2xx() =
         if this.Is2xx |> not then
@@ -150,8 +152,11 @@ module FastHttp =
                 let cts = new CancellationTokenSource(fastRequest.Timeout.TotalMilliseconds |> int)
                 cts.Token
 
+        let sw = Diagnostics.Stopwatch() 
+        sw.Start()
         use! response = client.SendAsync(request, ct) |> Async.AwaitTask
         let! responseBody = response.Content.ReadAsStringAsync() |> Async.AwaitTask
+        sw.Stop()
         let responseHeaders =
             response.Headers // does this include the content header?
             |> Seq.map (function KeyValue(k,v) -> k, String.Join(", ", v))
@@ -159,6 +164,7 @@ module FastHttp =
 
         let fastResponse = {
             RequestUrl = request.RequestUri.AbsoluteUri
+            Elapsed = sw.Elapsed
             StatusCode = response.StatusCode |> int
             Headers = responseHeaders
             Body = responseBody }
