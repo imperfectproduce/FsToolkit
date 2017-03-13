@@ -23,6 +23,28 @@ module Result =
         | Ok x -> Ok(f x)
         | Error x -> Error x
 
+    let oks rs =
+        Seq.filter
+            (fun r ->
+                match r with
+                | Ok _ -> true
+                | _ -> false)
+            rs
+
+    let errors rs =
+        Seq.filter
+            (fun r ->
+                match r with
+                | Error _ -> true
+                | _ -> false)
+            rs
+
+    let partition rs =
+        let isOk = (fun r -> match r with | Ok _ -> true | _ -> false)
+        rs
+        |> Seq.groupBy isOk
+        |> Seq.map snd
+
 module AsyncResult =
     let bind f r = async {
         let! r = r
