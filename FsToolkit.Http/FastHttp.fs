@@ -27,8 +27,10 @@ type FastRequest = {
     CancellationToken : CancellationToken option
     ///Indicates whether or not UTF-8 BOM should be include when encoding / decoding utf-8 charset content
     IncludeUtf8Bom : bool
+    ///Indicates whether non-2xx response should fail with exception
+    Ensure2xx : bool
 } with 
-    ///Default fast request: GET | http://example.com | JSON | no body | timeout = 60s
+    ///Default fast request: GET | http://example.com | JSON | no body | timeout = 60s | Ensure2xx false
     static member Default = {
         Method = "GET" 
         Url = "http://example.org"
@@ -41,6 +43,7 @@ type FastRequest = {
         Timeout = TimeSpan.FromSeconds(60.)
         CancellationToken = None
         IncludeUtf8Bom = false
+        Ensure2xx = false
     }
 
 type FastResponse = {
@@ -49,12 +52,10 @@ type FastResponse = {
     Headers : (string * string) list
     Body : string
 } with 
-    override this.ToString() =
-        sprintf "{ FastResponse.RequestUrl=%s; StatusCode=%i; Body=%s }" this.RequestUrl this.StatusCode this.Body
     member this.Is2xx =
         this.StatusCode >= 200 && this.StatusCode <= 299
     member this.Fail() =
-        let msg = sprintf "The remote server returned an error: %i.  Response from %s: %s" this.StatusCode this.RequestUrl this.Body
+        let msg = sprintf "The remote server response was rejected by caller: %i.  Response from %s: %s" this.StatusCode this.RequestUrl this.Body
         raise <| HttpRequestException(msg)
     member this.Ensure2xx() =
         if this.Is2xx |> not then
@@ -156,12 +157,16 @@ module FastHttp =
             |> Seq.map (function KeyValue(k,v) -> k, String.Join(", ", v))
             |> Seq.toList
 
-        return {
+        let fastResponse = {
             RequestUrl = request.RequestUri.AbsoluteUri
             StatusCode = response.StatusCode |> int
             Headers = responseHeaders
-            Body = responseBody
-        }
+            Body = responseBody }
+
+        if fastRequest.Ensure2xx then
+            fastResponse.Ensure2xx()
+
+        return fastResponse
     }
 
     let send = sendAsync>>Async.RunSynchronously
