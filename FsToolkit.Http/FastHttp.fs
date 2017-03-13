@@ -9,8 +9,6 @@ open System.Text
 open System.Text.RegularExpressions
 
 //TODO
-// - query params
-// - elapsed property
 // - content-type headers for response
 
 type FastRequest = {
@@ -158,9 +156,11 @@ module FastHttp =
         let! responseBody = response.Content.ReadAsStringAsync() |> Async.AwaitTask
         sw.Stop()
         let responseHeaders =
-            response.Headers // does this include the content header?
-            |> Seq.map (function KeyValue(k,v) -> k, String.Join(", ", v))
-            |> Seq.toList
+            let parseHeaders headers =
+                headers
+                |> Seq.map (function KeyValue(k,v:string seq) -> k, String.Join(", ", v))
+                |> Seq.toList
+            parseHeaders response.Headers @ parseHeaders response.Content.Headers
 
         let fastResponse = {
             RequestUrl = request.RequestUri.AbsoluteUri
