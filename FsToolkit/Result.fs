@@ -31,7 +31,14 @@ module Result =
         rs
         |> Seq.groupBy isOk
         |> Map.ofSeq
-        |> (fun m -> (Map.tryFind true m, Map.tryFind false m)
+        |> (fun m ->
+            let oks = Map.tryFind true m
+                      |> Option.map (Seq.map (fun r -> match r with | Ok x -> x | x -> failwithf "Unexpected result: %A" x))
+                      |> (fun rs -> match rs with | None -> Seq.empty | Some x -> x)
+            let errs = Map.tryFind false m
+                       |> Option.map (Seq.map (fun r -> match r with | Error x -> x | x -> failwithf "Unexpected result: %A" x))
+                       |> (fun rs -> match rs with | None -> Seq.empty | Some x -> x)
+            (oks, errs))
 
     let oks rs =
         rs
