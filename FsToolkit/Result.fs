@@ -23,6 +23,33 @@ module Result =
         | Ok x -> Ok(f x)
         | Error x -> Error x
 
+    let partition rs =
+        let isOk r =
+            match r with
+            | Ok _ -> true
+            | _ -> false
+        rs
+        |> Seq.groupBy isOk
+        |> Map.ofSeq
+        |> (fun m ->
+            let oks = Map.tryFind true m
+                      |> Option.map (Seq.map (fun r -> match r with | Ok x -> x | x -> failwithf "Unexpected result: %A" x))
+                      |> (fun rs -> match rs with | None -> Seq.empty | Some x -> x)
+            let errs = Map.tryFind false m
+                       |> Option.map (Seq.map (fun r -> match r with | Error x -> x | x -> failwithf "Unexpected result: %A" x))
+                       |> (fun rs -> match rs with | None -> Seq.empty | Some x -> x)
+            (oks, errs))
+
+    let oks rs =
+        rs
+        |> partition
+        |> fst
+
+    let errors rs =
+        rs
+        |> partition
+        |> snd
+
 module AsyncResult =
     let bind f r = async {
         let! r = r
