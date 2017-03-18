@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="LinqTests.fs" />
+    <Compile Include="SerializationTests.fs" />
     <Content Include="App.config" />
     <None Include="paket.references" />
   </ItemGroup>

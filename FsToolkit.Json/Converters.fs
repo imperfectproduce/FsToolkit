@@ -105,15 +105,20 @@ module Converters =
         let readDuProperties (reader: JsonReader) = 
             let mutable caseName = ""
             let mutable properties = JObject()
-            let jObj = JToken.ReadFrom reader :?> JObject
-            caseName <- jObj.Value<string>("Case")
-            jObj.Remove("Case") |> ignore
-            //de-unify auto-field names
-            if jObj.Properties() |> Seq.length = 1 && jObj.Property("Item1") <> null then
-                jObj.Add("Item", jObj.["Item1"]) |> ignore
-                jObj.Remove("Item1") |> ignore
-            properties <- jObj
-            caseName, properties
+            let jToken = JToken.ReadFrom reader 
+            match jToken with
+            | :? JValue as jValue when jValue.Value = null -> 
+                null, null
+            | _ ->
+                let jObj = jToken :?> JObject
+                caseName <- jObj.Value<string>("Case")
+                jObj.Remove("Case") |> ignore
+                //de-unify auto-field names
+                if jObj.Properties() |> Seq.length = 1 && jObj.Property("Item1") <> null then
+                    jObj.Add("Item", jObj.["Item1"]) |> ignore
+                    jObj.Remove("Item1") |> ignore
+                properties <- jObj
+                caseName, properties
             
         let writeDuBasic (writer:JsonWriter) (value:UnionCaseValue) (serializer:JsonSerializer) =
             writer.WriteStartObject()
@@ -135,25 +140,28 @@ module Converters =
         
         override __.ReadJson(reader, objType, _, serializer) = 
             let caseName, properties = readDuProperties reader
-            let caseInfos = FSharpType.GetUnionCases objType
-            let caseInfo = caseInfos |> Array.tryFind (fun a -> a.Name = caseName)
-            match caseInfo with
-            | None -> failwithf "Couldn't find case '%s' on %A" caseName objType
-            | Some caseInfo -> 
-                let fields = caseInfo.GetFields()
-                let fieldValues = System.Collections.Generic.Dictionary<string, obj>()
-                for property in properties.Properties() do
-                    let field = fields |> Array.tryFind (fun f -> f.Name = property.Name)
-                    match field with
-                    | Some f -> fieldValues.Add(property.Name, property.Value.ToObject(f.PropertyType, serializer))
-                    | None -> fieldValues.Add(property.Name, null)
-                let values = 
-                    fields 
-                    |> Array.map (fun f -> 
-                        match fieldValues.TryGetValue f.Name with
-                        | true, v -> v
-                        | _ -> null) //TODO: need more general default value (like None, 0, 0.0, etc. X.Empty)
-                FSharpValue.MakeUnion(caseInfo, values)
+            match caseName with
+            | null -> null
+            | _ ->
+                let caseInfos = FSharpType.GetUnionCases objType
+                let caseInfo = caseInfos |> Array.tryFind (fun a -> a.Name = caseName)
+                match caseInfo with
+                | None -> failwithf "Couldn't find case '%s' on %A" caseName objType
+                | Some caseInfo -> 
+                    let fields = caseInfo.GetFields()
+                    let fieldValues = System.Collections.Generic.Dictionary<string, obj>()
+                    for property in properties.Properties() do
+                        let field = fields |> Array.tryFind (fun f -> f.Name = property.Name)
+                        match field with
+                        | Some f -> fieldValues.Add(property.Name, property.Value.ToObject(f.PropertyType, serializer))
+                        | None -> fieldValues.Add(property.Name, null)
+                    let values = 
+                        fields 
+                        |> Array.map (fun f -> 
+                            match fieldValues.TryGetValue f.Name with
+                            | true, v -> v
+                            | _ -> null) //TODO: need more general default value (like None, 0, 0.0, etc. X.Empty)
+                    FSharpValue.MakeUnion(caseInfo, values)
         
         override __.CanConvert(objType) = 
             canConvertDu objType
