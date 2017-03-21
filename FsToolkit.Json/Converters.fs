@@ -168,14 +168,15 @@ module Converters =
 
     type ClientDUJsonConverter() = 
         inherit JsonConverter()
+        let duIsEnumLike (cases:UnionCaseInfo []) = 
+            cases 
+            |> Seq.forall (fun case ->
+                case.GetFields() |> Array.isEmpty)
 
         override __.WriteJson(writer, value, serializer) = 
             let value = UnionCaseValue.FromValue(value)
             let cases = FSharpType.GetUnionCases(value.UnionType)
-            let isEnumLike = 
-                cases 
-                |> Seq.forall (fun case ->
-                    case.GetFields() |> Array.isEmpty)
+            let isEnumLike = duIsEnumLike cases
             if isEnumLike then
                 writer.WriteValue(value.Name)
             else
@@ -196,8 +197,18 @@ module Converters =
                 writer.WriteEndObject()
 
         override __.ReadJson(reader, objType, _, serializer) = 
-            ///We actually do need a reader here since we are using the client serializer as API in / out model serializer
-            raise <| System.InvalidOperationException("Client converter can't read")
+            let cases = FSharpType.GetUnionCases(objType)
+            let isEnumLike = duIsEnumLike cases
+            if isEnumLike then
+                let caseNameToken = JToken.ReadFrom reader
+                match caseNameToken.Value<string>() with
+                | null -> null //None
+                | caseName ->
+                    let case = cases |> Seq.find (fun c -> c.Name = caseName)
+                    FSharpValue.MakeUnion(case,[||])
+            else
+                ///We actually do need a reader here since we are using the client serializer as API in / out model serializer
+                raise <| System.InvalidOperationException("Client converter can't read")
 
         override __.CanConvert(objType) = 
             canConvertDu objType
