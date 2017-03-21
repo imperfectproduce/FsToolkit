@@ -202,7 +202,7 @@ module Converters =
             if isEnumLike then
                 let caseNameToken = JToken.ReadFrom reader
                 match caseNameToken.Value<string>() with
-                | null -> null //None
+                | null | "" -> null //None
                 | caseName ->
                     let case = cases |> Seq.find (fun c -> c.Name = caseName)
                     FSharpValue.MakeUnion(case,[||])

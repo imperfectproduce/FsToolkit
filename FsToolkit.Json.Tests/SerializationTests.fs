@@ -23,6 +23,17 @@ module SerializtionTests =
             test <@ value = value' @>
 
         [<Test>]
+        let ``None cases client DU`` () =
+            let expected = { FieldA=None }
+            let jsonCases = [
+                "{\"field1\":\"\"}"
+                "{\"field1\":null}"
+            ]
+            for json in jsonCases do
+                let actual = deserialize Client json
+                test <@ actual = expected @>
+
+        [<Test>]
         let ``round-trip client DU including option cases`` () =
             let values = [
                 { FieldA=None }
