@@ -115,3 +115,11 @@ module LinqTests =
         let yl = (json?hello : JArray) |> Seq.map id |> Seq.toList
         test <@ xl = yl @>
 
+    [<Test>]
+    let ``maps`` () =
+        let json = JObject.Parse """{ Components: { "A": 1, "B": 2 } }"""
+        let kvps =
+            (json?Components : Map<_,_>)
+            |> Seq.map(fun (KeyValue(key, value)) -> key,value)
+            |> Seq.toList
+        test <@ kvps = [("A", 1); ("B", 2)] @>
