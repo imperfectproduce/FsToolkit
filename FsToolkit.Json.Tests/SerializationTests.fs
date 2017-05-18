@@ -5,6 +5,7 @@ open Swensen.Unquote
 open NUnit.Framework
 open Newtonsoft.Json.Linq
 open FsToolkit.Json.Serialization
+open System.Collections.Generic
 
 module SerializtionTests =
     module Client =
@@ -44,6 +45,17 @@ module SerializtionTests =
                 let value' = deserialize Client json
                 test <@ value = value' @>
 
+        [<Test>]
+        let ``map insertion order`` () =
+            let json = """{ b: 1, a: 2 }"""
+            let value: System.Collections.Specialized.OrderedDictionary = deserialize Client json
+            let expected = [("b", 1L); ("a", 2L)]
+            let actual = 
+                let keys = seq { for k in value.Keys -> k :?> string }
+                let values = seq { for v in value.Values -> v :?> int64 }
+                Seq.zip keys values |> Seq.toList
+            test <@ expected = actual @>
+
     module Storage =
         type Du1 =
             | Case1
@@ -76,6 +88,3 @@ module SerializtionTests =
                 let json = serialize Storage value
                 let value' = deserialize Storage json
                 test <@ value = value' @>
-
-    
-
