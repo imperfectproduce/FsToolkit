@@ -9,6 +9,10 @@ type InsertionDictionary<'K, 'V when 'K : equality and 'V : equality>() =
         let values = seq { for v in dictionary.Values -> v :?> 'V }
         Seq.zip keys values
 
+    new (kvps) as this = InsertionDictionary() then
+        for k,v in kvps do
+            (this :> IDictionary<_,_>).Add(k,v)
+
     interface IDictionary<'K,'V> with
         member this.Add(key, value) = dictionary.Add(key,value)
         member this.Add(kvp) = dictionary.Add(kvp.Key, kvp.Value)
