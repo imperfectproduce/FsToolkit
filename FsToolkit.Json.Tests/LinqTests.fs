@@ -123,3 +123,14 @@ module LinqTests =
             |> Seq.map(fun (KeyValue(key, value)) -> key,value)
             |> Seq.toList
         test <@ kvps = [("A", 1); ("B", 2)] @>
+
+    [<Test>]
+    let ``ints`` () =
+        let json = JObject.Parse """{ qty1: 3, qty2: "", qty3: "0" }"""
+        test <@ json?qty1 = "3" @>
+        test <@ json?qty1 = 3 @>
+        test <@ json?qty1 <> "" @>
+        test <@ json?qty1 <> "0" @>
+
+        test <@ json?qty2 = "" @>
+        test <@ json?qty3 = "0" @>
