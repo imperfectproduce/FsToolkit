@@ -53,6 +53,24 @@ module SerializtionTests =
             let actual = value |> Seq.map (|KeyValue|) |> Seq.toList
             test <@ expected = actual @>
 
+        type SingleValueDu =
+            | Case1 of int
+            | Case2 of int * string
+            | Case3 of a:int * b:string * d:string
+
+        [<Test>]
+        let ``round-trip client DU single value`` () =
+            let values = [
+                Case1(3)
+                Case2(3,"4")
+                Case3(3,"4","5")
+            ]
+            for value in values do
+                let json = serialize Client value
+                let value' = deserialize Client json
+                test <@ value = value' @>
+
+
     module Storage =
         type Du1 =
             | Case1

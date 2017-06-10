@@ -176,6 +176,25 @@ module Converters =
             |> Seq.forall (fun case ->
                 case.GetFields() |> Array.isEmpty)
 
+        let readDuProperties (reader: JsonReader) = 
+            let mutable caseName = ""
+            let mutable properties = JObject()
+            let jToken = JToken.ReadFrom reader 
+            match jToken with
+            | :? JValue as jValue when jValue.Value = null -> 
+                null, null
+            | _ ->
+                let jObj = jToken :?> JObject
+                caseName <- jObj.Value<string>("case")
+                jObj.Remove("case") |> ignore
+                //de-unify auto-field names
+                if jObj.Properties() |> Seq.length = 1 && jObj.Property("value") <> null then
+                    jObj.Add("Item", jObj.["value"]) |> ignore
+                    jObj.Remove("value") |> ignore
+                //need to handle "_case" properties too
+                properties <- jObj
+                caseName, properties
+
         override __.WriteJson(writer, value, serializer) = 
             let value = UnionCaseValue.FromValue(value)
             let cases = FSharpType.GetUnionCases(value.UnionType)
@@ -210,8 +229,8 @@ module Converters =
                     let case = cases |> Seq.find (fun c -> c.Name = caseName)
                     FSharpValue.MakeUnion(case,[||])
             else
-                ///We actually do need a reader here since we are using the client serializer as API in / out model serializer
-                raise <| System.InvalidOperationException("Client converter can't read")
+                let caseName, properties = readDuProperties reader
+                readDu objType serializer caseName properties
 
         override __.CanConvert(objType) = 
             canConvertDu objType
