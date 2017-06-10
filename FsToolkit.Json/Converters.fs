@@ -82,6 +82,30 @@ module Converters =
     let canConvertDu objType =
         FSharpType.IsUnion objType && not (isList objType) && not (isOption objType)
 
+    let readDu objType serializer caseName (properties:JObject) =
+        match caseName with
+        | null -> null
+        | _ ->
+            let caseInfos = FSharpType.GetUnionCases objType
+            let caseInfo = caseInfos |> Array.tryFind (fun a -> a.Name = caseName)
+            match caseInfo with
+            | None -> failwithf "Couldn't find case '%s' on %A" caseName objType
+            | Some caseInfo -> 
+                let fields = caseInfo.GetFields()
+                let fieldValues = System.Collections.Generic.Dictionary<string, obj>()
+                for property in properties.Properties() do
+                    let field = fields |> Array.tryFind (fun f -> f.Name = property.Name)
+                    match field with
+                    | Some f -> fieldValues.Add(property.Name, property.Value.ToObject(f.PropertyType, serializer))
+                    | None -> fieldValues.Add(property.Name, null)
+                let values = 
+                    fields 
+                    |> Array.map (fun f -> 
+                        match fieldValues.TryGetValue f.Name with
+                        | true, v -> v
+                        | _ -> null) //TODO: need more general default value (like None, 0, 0.0, etc. X.Empty)
+                FSharpValue.MakeUnion(caseInfo, values)
+
     type UnionCaseValue = {
         UnionType: Type
         CaseInfo: UnionCaseInfo
@@ -140,28 +164,7 @@ module Converters =
         
         override __.ReadJson(reader, objType, _, serializer) = 
             let caseName, properties = readDuProperties reader
-            match caseName with
-            | null -> null
-            | _ ->
-                let caseInfos = FSharpType.GetUnionCases objType
-                let caseInfo = caseInfos |> Array.tryFind (fun a -> a.Name = caseName)
-                match caseInfo with
-                | None -> failwithf "Couldn't find case '%s' on %A" caseName objType
-                | Some caseInfo -> 
-                    let fields = caseInfo.GetFields()
-                    let fieldValues = System.Collections.Generic.Dictionary<string, obj>()
-                    for property in properties.Properties() do
-                        let field = fields |> Array.tryFind (fun f -> f.Name = property.Name)
-                        match field with
-                        | Some f -> fieldValues.Add(property.Name, property.Value.ToObject(f.PropertyType, serializer))
-                        | None -> fieldValues.Add(property.Name, null)
-                    let values = 
-                        fields 
-                        |> Array.map (fun f -> 
-                            match fieldValues.TryGetValue f.Name with
-                            | true, v -> v
-                            | _ -> null) //TODO: need more general default value (like None, 0, 0.0, etc. X.Empty)
-                    FSharpValue.MakeUnion(caseInfo, values)
+            readDu objType serializer caseName properties
         
         override __.CanConvert(objType) = 
             canConvertDu objType
