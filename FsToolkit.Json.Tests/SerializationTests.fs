@@ -13,8 +13,8 @@ module SerializtionTests =
             | A
             | B
         
-        type JsonObj1 = { Field1: EnumDu }
-        type JsonObj2 = { FieldA: EnumDu option }
+        type JsonObj1<'a> = { Field1: 'a }
+        type JsonObj2<'a> = { FieldA: 'a option }
         [<Test>]
         let ``round-trip client DU`` () =
             let value = { Field1=B }
@@ -25,7 +25,7 @@ module SerializtionTests =
 
         [<Test>]
         let ``None cases client DU`` () =
-            let expected = { FieldA=None }
+            let expected = { FieldA=(None:EnumDu option) }
             let jsonCases = [
                 "{\"field1\":\"\"}"
                 "{\"field1\":null}"
