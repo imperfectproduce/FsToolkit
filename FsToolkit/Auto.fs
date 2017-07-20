@@ -5,6 +5,7 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module Auto = 
+        
     ///Coalesce option value
     let inline (|?) x y = defaultArg x y
     ///Coalesce null value
@@ -24,6 +25,12 @@ module Auto =
             Some o
         else 
             None
+
+    let (|Int|_|) x = tryParse x : int option
+    let (|Int64|_|) x = tryParse x : int64 option
+    let (|Guid|_|) x = tryParse x : Guid option
+    let (|Double|_|) x = tryParse x : Double option
+    let (|Bool|_|) x = tryParse x : bool option
     
     let inline aprintfn fmt = 
         Printf.ksprintf (Console.Out.WriteLineAsync>>Async.AwaitTask) fmt
