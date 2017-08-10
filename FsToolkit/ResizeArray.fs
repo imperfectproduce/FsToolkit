@@ -33,3 +33,9 @@ module ResizeArray =
         let i = xs.FindIndex(Predicate predicate)
         let item = xs.[i]
         xs.[i] <- f item
+
+    ///Replace or add (to the end) the item matching the given predicate with the result of `f`
+    let updateOrAdd predicate f (xs:ResizeArray<_>) =
+        match xs.FindIndex(Predicate predicate) with
+        | -1 -> xs.Add(f None)
+        | i -> let item = xs.[i] in xs.[i] <- f (Some(item))
