@@ -37,6 +37,7 @@ module Config =
     ///Get config setting, looking in app settings, environment variables, and 'secrets.ini' in that order.
     ///Fails hard if not found.
     let tryGetSetting (name: string) =
+        let name = name.Trim()
         let cs = 
             [getAppSetting
              getEnvironmentVariable
