@@ -49,6 +49,12 @@ module Config =
         cs
 
     ///Get config setting, looking in app settings, environment variables, and 'secrets.ini' in that order.
+    let getSettingOrDefault name fallback = 
+        match tryGetSetting name with
+        | Some cs -> cs
+        | None -> fallback
+
+    ///Get config setting, looking in app settings, environment variables, and 'secrets.ini' in that order.
     let getSetting name = 
         match tryGetSetting name with
         | Some cs -> cs
