@@ -1,5 +1,5 @@
 source https://api.nuget.org/v3/index.json
-framework >= net452
+framework = net47
 
 nuget Newtonsoft.Json
 nuget Npgsql
