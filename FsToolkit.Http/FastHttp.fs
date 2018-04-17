@@ -30,7 +30,7 @@ type FastRequest = {
     ///Indicates whether query param keys and values should be escaped
     EscapeQueryParams : bool
 } with 
-    ///Default fast request: GET | http://example.com | JSON | no body | timeout = 60s | Ensure2xx false | EscapeQueryParams false
+    ///Default fast request: GET | http://example.com | JSON | no body | timeout = 60s | Ensure2xx false | EscapeQueryParams true
     static member Default = {
         Method = "GET" 
         Url = "http://example.org"
@@ -44,7 +44,7 @@ type FastRequest = {
         CancellationToken = None
         IncludeUtf8Bom = false
         Ensure2xx = false
-        EscapeQueryParams = false
+        EscapeQueryParams = true
     }
 
 type FastResponse = {
