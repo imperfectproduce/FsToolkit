@@ -76,6 +76,11 @@ module ResponsePatterns =
         then Some response
         else None
 
+    let (|Status404|_|) response =
+        if response.StatusCode = 404
+        then Some response
+        else None
+
 module FastHttp =
 
     ///Apply global (ServicePointManager) optimizations: call this once at application startup.
