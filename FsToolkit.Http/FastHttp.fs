@@ -66,20 +66,20 @@ type FastResponse = {
 
 [<AutoOpen>]
 module ResponsePatterns =
+    let private statusOption code response =
+        if response.StatusCode = code
+        then Some response
+        else None
+
     let (|Status2xx|_|) (response:FastResponse) =
         if response.Is2xx 
         then Some response
         else None
 
-    let (|Status400|_|) response =
-        if response.StatusCode = 400
-        then Some response
-        else None
-
-    let (|Status404|_|) response =
-        if response.StatusCode = 404
-        then Some response
-        else None
+    let (|Status400|_|) = statusOption 400
+    let (|Status401|_|) = statusOption 401
+    let (|Status403|_|) = statusOption 403
+    let (|Status404|_|) = statusOption 404
 
 module FastHttp =
 
