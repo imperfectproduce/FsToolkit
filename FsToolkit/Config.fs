@@ -34,13 +34,9 @@ module Config =
             |> Seq.tryHead
         with :? IO.FileNotFoundException -> None
 
-    let private memoize (f: 'a -> 'b) =
-        let cache = System.Collections.Concurrent.ConcurrentDictionary<'a, 'b>()
-        fun x -> cache.GetOrAdd(x, f)
-
     ///Get config setting, looking in app settings, environment variables, and 'secrets.ini' in that order.
     ///Fails hard if not found.
-    let private tryGetSettingDirect (name: string) =
+    let private tryGetSettingDynamic (name: string) =
         let name = name.Trim()
         let cs = 
             [getAppSetting
@@ -54,7 +50,7 @@ module Config =
 
     ///Get config setting, looking in app settings, environment variables, and 'secrets.ini' in that order.
     ///Fails hard if not found. Look-up is memoized
-    let tryGetSetting = memoize tryGetSettingDirect
+    let tryGetSetting = memoize tryGetSettingDynamic
 
     ///Get config setting, looking in app settings, environment variables, and 'secrets.ini' in that order.
     let getSettingOrDefault name fallback = 
