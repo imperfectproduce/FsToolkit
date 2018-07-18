@@ -5,6 +5,9 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module Auto = 
+    let memoize (f: 'a -> 'b) =
+        let cache = System.Collections.Concurrent.ConcurrentDictionary<'a, 'b>()
+        fun x -> cache.GetOrAdd(x, f)
         
     ///Coalesce option value
     let inline (|?) x y = defaultArg x y
