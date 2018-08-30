@@ -1,3 +1,4 @@
+redirects: on
 source https://api.nuget.org/v3/index.json
 framework = net47
 
@@ -5,3 +6,4 @@ nuget Newtonsoft.Json
 nuget Npgsql
 nuget NUnit
 nuget Unquote
+nuget FSharp.Core
