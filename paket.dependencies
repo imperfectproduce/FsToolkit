@@ -6,4 +6,4 @@ nuget Newtonsoft.Json
 nuget Npgsql
 nuget NUnit
 nuget Unquote
-nuget FSharp.Core
+nuget FSharp.Core 4.5.2 
