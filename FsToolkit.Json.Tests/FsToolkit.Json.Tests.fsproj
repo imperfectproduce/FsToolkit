@@ -66,6 +66,11 @@
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FsToolkit.Json\FsToolkit.Json.fsproj">
+      <Name>FsToolkit.Json</Name>
+      <Project>{c8124bbb-d016-4163-b26e-29fdf4a7fb5b}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\FsToolkit\FsToolkit.fsproj">
       <Name>FsToolkit</Name>
       <Project>{a1f7a3df-cce0-45eb-9459-0553e9fcad05}</Project>
@@ -75,11 +80,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\FsToolkit.Json\FsToolkit.Json.fsproj">
-      <Name>FsToolkit.Json</Name>
-      <Project>{c8124bbb-d016-4163-b26e-29fdf4a7fb5b}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="..\.paket\paket.targets" />
   <Choose>

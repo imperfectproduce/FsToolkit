@@ -9,28 +9,7 @@ open System.Reflection
 
 ///Custom converters for "exotic" F# types
 module Converters = 
-    let private memoize (f: 'a -> 'b) =
-        let cache = System.Collections.Concurrent.ConcurrentDictionary<'a, 'b>()
-        fun x -> cache.GetOrAdd(x, f)
-
-    /// True if a given generic Type definition matches a given Type.
-    let private isGeneric td (t : Type) = t.IsGenericType && t.GetGenericTypeDefinition() = td
-
-    let private _isList = isGeneric typedefof<FSharp.Collections.List<_>>
-    let isList = memoize _isList
-
-    let private _isOption = isGeneric typedefof<FSharp.Core.Option<_>>
-    let isOption = memoize _isOption
-
-    let getUnionCases = memoize FSharpType.GetUnionCases
-
-    let isTuple = memoize FSharpType.IsTuple 
-
-    let getTupleElements = memoize FSharpType.GetTupleElements
-
-    let isUnion = memoize FSharpType.IsUnion 
-
-    let getGenericArguments = memoize (fun (ty:Type) -> ty.GetGenericArguments ()) 
+    open Prelude
 
     /// Some 3 -> "3"; None -> null
     type OptionConverter() =
@@ -97,8 +76,10 @@ module Converters =
             let values = FSharpValue.GetTupleFields value
             serializer.Serialize(writer, values)
 
-    let canConvertDu objType =
+    let private _canConvertDu objType =
         isUnion objType && not (isList objType) && not (isOption objType)
+
+    let canConvertDu : Type -> bool = memoize _canConvertDu
 
     let readDu objType serializer caseName (properties:JObject) =
         match caseName with
@@ -189,10 +170,12 @@ module Converters =
 
     type ClientDUJsonConverter() = 
         inherit JsonConverter()
-        let duIsEnumLike (cases:UnionCaseInfo []) = 
+        let _duIsEnumLike (cases:UnionCaseInfo []) = 
             cases 
             |> Seq.forall (fun case ->
                 case.GetFields() |> Array.isEmpty)
+
+        let duIsEnumLike : UnionCaseInfo [] -> bool = memoize _duIsEnumLike
 
         let readDuProperties (reader: JsonReader) = 
             let mutable caseName = ""

@@ -6,6 +6,7 @@ open Microsoft.FSharp.Reflection
 open System.Reflection
 
 module Linq =
+    open Prelude
 
     ///True if missing or null valued property
     let isNullToken (j: JObject) = 
@@ -14,7 +15,7 @@ module Linq =
     ///None if 't is a type of Option<_>, null if 't is a reference type, default if 't is a value type
     let inline nullTokenObject<'t> =
         if typedefof<'t> = typedefof<FSharp.Core.Option<_>> then
-            let cases = FSharpType.GetUnionCases (typeof<'t>)
+            let cases = getUnionCases (typeof<'t>)
             FSharpValue.MakeUnion (cases.[0], [||]) :?> 't
         else
             Unchecked.defaultof<'t>
@@ -40,8 +41,8 @@ module Linq =
                 nullTokenObject<'t>
             else
                 if typedefof<'t> = typedefof<FSharp.Core.Option<_>> then
-                    let cases = FSharpType.GetUnionCases (typeof<'t>)
-                    let args = typeof<'t>.GetGenericArguments ()
+                    let cases = getUnionCases (typeof<'t>)
+                    let args = getGenericArguments (typeof<'t>)
                     let optionOf =
                         match args.[0].IsValueType with
                         | true -> (typedefof<Nullable<_>>).MakeGenericType ([| args.[0] |])

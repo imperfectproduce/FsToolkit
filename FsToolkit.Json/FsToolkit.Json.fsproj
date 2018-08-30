@@ -59,6 +59,7 @@
   -->
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Prelude.fs" />
     <Compile Include="Linq.fs" />
     <Compile Include="Converters.fs" />
     <Compile Include="Serialization.fs" />
