@@ -9,10 +9,28 @@ open System.Reflection
 
 ///Custom converters for "exotic" F# types
 module Converters = 
+    let private memoize (f: 'a -> 'b) =
+        let cache = System.Collections.Concurrent.ConcurrentDictionary<'a, 'b>()
+        fun x -> cache.GetOrAdd(x, f)
+
     /// True if a given generic Type definition matches a given Type.
-    let isGeneric td (t : Type) = t.IsGenericType && t.GetGenericTypeDefinition() = td
-    let isList = isGeneric typedefof<FSharp.Collections.List<_>>
-    let isOption = isGeneric typedefof<FSharp.Core.Option<_>>
+    let private isGeneric td (t : Type) = t.IsGenericType && t.GetGenericTypeDefinition() = td
+
+    let private _isList = isGeneric typedefof<FSharp.Collections.List<_>>
+    let isList = memoize _isList
+
+    let private _isOption = isGeneric typedefof<FSharp.Core.Option<_>>
+    let isOption = memoize _isOption
+
+    let getUnionCases = memoize FSharpType.GetUnionCases
+
+    let isTuple = memoize FSharpType.IsTuple 
+
+    let getTupleElements = memoize FSharpType.GetTupleElements
+
+    let isUnion = memoize FSharpType.IsUnion 
+
+    let getGenericArguments = memoize (fun (ty:Type) -> ty.GetGenericArguments ()) 
 
     /// Some 3 -> "3"; None -> null
     type OptionConverter() =
@@ -23,8 +41,8 @@ module Converters =
 
         override __.ReadJson(reader, objType, _, serializer) = 
             //adapted from https://github.com/kolektiv/FifteenBelow.Json/blob/master/src/FifteenBelow.Json/Converters.fs#L150
-            let cases = FSharpType.GetUnionCases (objType)
-            let args = objType.GetGenericArguments ()
+            let cases = getUnionCases objType
+            let args = getGenericArguments objType
  
             let optionOf =
                 match args.[0].IsValueType with
@@ -51,11 +69,11 @@ module Converters =
         inherit JsonConverter()
 
         override __.CanConvert(objType) = 
-            FSharpType.IsTuple objType
+            isTuple objType
 
         override __.ReadJson(reader, objType, existingValue, serializer) = 
             //adapted from https://github.com/kolektiv/FifteenBelow.Json/blob/master/src/FifteenBelow.Json/Converters.fs#L150
-            let types = FSharpType.GetTupleElements objType
+            let types = getTupleElements objType
 
             let jtokens = 
                 [|
@@ -80,13 +98,13 @@ module Converters =
             serializer.Serialize(writer, values)
 
     let canConvertDu objType =
-        FSharpType.IsUnion objType && not (isList objType) && not (isOption objType)
+        isUnion objType && not (isList objType) && not (isOption objType)
 
     let readDu objType serializer caseName (properties:JObject) =
         match caseName with
         | null -> null
         | _ ->
-            let caseInfos = FSharpType.GetUnionCases objType
+            let caseInfos = getUnionCases objType
             let caseInfo = caseInfos |> Array.tryFind (fun a -> a.Name = caseName)
             match caseInfo with
             | None -> failwithf "Couldn't find case '%s' on %A" caseName objType
@@ -197,7 +215,7 @@ module Converters =
 
         override __.WriteJson(writer, value, serializer) = 
             let value = UnionCaseValue.FromValue(value)
-            let cases = FSharpType.GetUnionCases(value.UnionType)
+            let cases = getUnionCases(value.UnionType)
             let isEnumLike = duIsEnumLike cases
             if isEnumLike then
                 writer.WriteValue(value.Name)
@@ -219,7 +237,7 @@ module Converters =
                 writer.WriteEndObject()
 
         override __.ReadJson(reader, objType, _, serializer) = 
-            let cases = FSharpType.GetUnionCases(objType)
+            let cases = getUnionCases(objType)
             let isEnumLike = duIsEnumLike cases
             if isEnumLike then
                 let caseNameToken = JToken.ReadFrom reader
