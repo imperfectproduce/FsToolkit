@@ -80,6 +80,7 @@ module ResponsePatterns =
     let (|Status401|_|) = statusOption 401
     let (|Status403|_|) = statusOption 403
     let (|Status404|_|) = statusOption 404
+    let (|Status422|_|) = statusOption 422
 
 module FastHttp =
 
