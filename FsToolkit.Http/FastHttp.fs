@@ -105,6 +105,7 @@ module FastHttp =
         let client = new HttpClient(handler)
         //speeds up PUT and POST requests
         client.DefaultRequestHeaders.ExpectContinue <- Nullable(false)
+        client.Timeout <- TimeSpan.FromDays(1.) // FastRequest.Timeout should be used instead
         client
 
     let private utf8Encoding includeBom = UTF8Encoding(includeBom) :> Encoding
