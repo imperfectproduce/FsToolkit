@@ -12,7 +12,7 @@ module PostgresAdo =
         np
         
     ///Execute a select query
-    let execQuery (openConn:NpgsqlConnection) sql ps read = 
+    let execQuery (openConn:NpgsqlConnection) sql ps read =
         use cmd = openConn.CreateCommand()
         cmd.CommandText <- sql
         for p in ps do
@@ -20,8 +20,19 @@ module PostgresAdo =
         use reader = cmd.ExecuteReader()
         [ while reader.Read() do yield read reader ]
 
+    ///Execute a select query
+    let execQueryOption (openConn:NpgsqlConnection) sql ps read =
+        use cmd = openConn.CreateCommand()
+        cmd.CommandText <- sql
+        for p in ps do
+            cmd.Parameters.Add(p) |> ignore
+        use reader = cmd.ExecuteReader()
+        if reader.HasRows
+        then Some([ while reader.Read() do yield read reader ])
+        else None
+
     ///Execute an insert or update statement and return the number of rows affected
-    let execNonQuery (openConn:NpgsqlConnection) sql ps = 
+    let execNonQuery (openConn:NpgsqlConnection) sql ps =
         use cmd = openConn.CreateCommand()
         cmd.CommandText <- sql
         for p in ps do
@@ -29,12 +40,23 @@ module PostgresAdo =
         cmd.ExecuteNonQuery()
 
     ///Execute query returning first column from first row of result set
-    let execScalar (openConn:NpgsqlConnection) sql ps = 
+    let execScalar (openConn:NpgsqlConnection) sql ps =
         use cmd = openConn.CreateCommand()
         cmd.CommandText <- sql
         for p in ps do
             cmd.Parameters.Add(p) |> ignore
         cmd.ExecuteScalar()
+
+    ///Execute query returning first column from first row of result set
+    let execScalarOption (openConn:NpgsqlConnection) sql ps =
+        use cmd = openConn.CreateCommand()
+        cmd.CommandText <- sql
+        for p in ps do
+            cmd.Parameters.Add(p) |> ignore
+        let result = cmd.ExecuteScalar()
+        if result = null
+        then None
+        else Some(result)
 
     let read1<'a> (reader:NpgsqlDataReader) =
         reader.GetFieldValue<'a>(0)
