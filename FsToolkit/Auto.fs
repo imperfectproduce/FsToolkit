@@ -14,6 +14,9 @@ module Auto =
     ///Coalesce null value
     let inline (|??) (x:'a) y = if obj.ReferenceEquals(x, Unchecked.defaultof<'a>) then y else x
 
+    ///High precedence, right associative backwards pipe
+    let inline (^|) f a = f a
+
     type IDictionary<'k,'v> with
         /// Gets the value associated with the specified key, or None if key not found.
         member inline x.TryGet key =
