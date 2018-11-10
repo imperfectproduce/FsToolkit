@@ -37,6 +37,7 @@ module Auto =
     let (|Guid|_|) x = tryParse x : Guid option
     let (|Double|_|) x = tryParse x : Double option
     let (|Bool|_|) x = tryParse x : bool option
+    let (|Decimal|_|) x = tryParse x : Decimal option
     
     let inline aprintfn fmt = 
         Printf.ksprintf (Console.Out.WriteLineAsync>>Async.AwaitTask) fmt
