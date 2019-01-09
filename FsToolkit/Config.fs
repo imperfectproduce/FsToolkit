@@ -24,7 +24,7 @@ module Config =
         | variable -> Some variable
 
     let private getIniSetting configPath configFileName (name: string) =
-        let regex = Text.RegularExpressions.Regex(@"^(?<Name>[\w-]+)\s*=\s*(?<Value>.+)$")
+        let regex = Text.RegularExpressions.Regex(@"^(?<Name>[\w-|]+)\s*=\s*(?<Value>.+)$")
         let path = IO.Path.Combine(configPath, configFileName)
         try
             IO.File.ReadAllLines(path)
