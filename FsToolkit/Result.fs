@@ -1,13 +1,5 @@
 ﻿namespace FsToolkit
 
-//Matches definition from https://github.com/Microsoft/visualfsharp/pull/964
-///Type for Railway Oriented Programming: http://fsharpforfunandprofit.com/posts/recipe-part2/
-[<StructuralEquality; StructuralComparison>]
-[<CompiledName("FSharpResult`2")>]
-type Result<'T,'TError> = 
-    | Ok of 'T 
-    | Error of 'TError
-
 module Result =
     let bind f r =
         match r with
