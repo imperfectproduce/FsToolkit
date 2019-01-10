@@ -13,6 +13,8 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FsToolkit", "FsToolkit\FsTo
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsToolkit.Json", "FsToolkit.Json\FsToolkit.Json.fsproj", "{A286533A-0CD8-4C3E-82B2-2EAD823A8D76}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsToolkit.Http", "FsToolkit.Http\FsToolkit.Http.fsproj", "{B626E3F4-0B63-4ED6-A727-A3A633237738}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{A286533A-0CD8-4C3E-82B2-2EAD823A8D76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A286533A-0CD8-4C3E-82B2-2EAD823A8D76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A286533A-0CD8-4C3E-82B2-2EAD823A8D76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B626E3F4-0B63-4ED6-A727-A3A633237738}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B626E3F4-0B63-4ED6-A727-A3A633237738}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B626E3F4-0B63-4ED6-A727-A3A633237738}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B626E3F4-0B63-4ED6-A727-A3A633237738}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
