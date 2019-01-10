@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Prelude.fs" />
+    <Compile Include="Converters.fs" />
+    <Compile Include="Linq.fs" />
+    <Compile Include="Serialization.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="FsToolkit.Json.nuspec" />
+    <None Include="paket.references" />
+    <None Include="README.md" />
+  </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
+</Project>

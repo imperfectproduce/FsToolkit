@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>FsToolkit</id>
+    <version>4.0.0-alpha$build_number$</version>
+    <description>Basic helpers</description>
+    <authors>Imperfect Produce</authors>
+	<licenseUrl>https://raw.githubusercontent.com/relayfoods/FsToolkit/master/LICENSE</licenseUrl>
+	<projectUrl>https://github.com/relayfoods/FsToolkit</projectUrl>
+	<dependencies>
+		<dependency id="FSharp.Core" version="4.5.2" />
+		<dependency id="System.Configuration.ConfigurationManager" version="4.5.0" />
+	</dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\FsToolkit.dll" target="lib\net47" /> 
+  </files>
+</package>
