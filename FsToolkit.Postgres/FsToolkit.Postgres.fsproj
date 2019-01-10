@@ -4,10 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="FastHttp.fs" />
+    <Compile Include="PostgresAdo.fs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="FsToolkit.Http.nuspec" />
+    <None Include="FsToolkit.Postgres.nuspec" />
     <None Include="paket.references" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
