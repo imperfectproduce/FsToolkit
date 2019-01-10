@@ -1,9 +1,10 @@
 redirects: on
 source https://api.nuget.org/v3/index.json
-framework = net47
+framework: netstandard2.0
 
 nuget Newtonsoft.Json
 nuget Npgsql
 nuget NUnit
 nuget Unquote
+nuget System.Configuration.ConfigurationManager
 nuget FSharp.Core 4.5.2 

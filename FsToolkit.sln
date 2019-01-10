@@ -1,23 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.271
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsToolkit.Json", "FsToolkit.Json\FsToolkit.Json.fsproj", "{C8124BBB-D016-4163-B26E-29FDF4A7FB5B}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{63391FEF-35D9-4170-ABEA-23573849A0E8}"
 	ProjectSection(SolutionItems) = preProject
 		paket.dependencies = paket.dependencies
 		paket.lock = paket.lock
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsToolkit.Json.Tests", "FsToolkit.Json.Tests\FsToolkit.Json.Tests.fsproj", "{B7DB418F-DD7D-46F1-A072-FBD9BBB16889}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsToolkit", "FsToolkit\FsToolkit.fsproj", "{A1F7A3DF-CCE0-45EB-9459-0553E9FCAD05}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsToolkit.Postgres", "FsToolkit.Postgres\FsToolkit.Postgres.fsproj", "{191F74A6-57D3-4E3D-AFA3-3FA53A305857}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsToolkit.Http", "FsToolkit.Http\FsToolkit.Http.fsproj", "{7359DEF4-720A-4173-A061-0C84C99F5853}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsToolkit", "FsToolkit\FsToolkit.fsproj", "{9FD69053-90C4-42D6-BF27-9F282EE3F50A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,28 +17,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C8124BBB-D016-4163-B26E-29FDF4A7FB5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C8124BBB-D016-4163-B26E-29FDF4A7FB5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C8124BBB-D016-4163-B26E-29FDF4A7FB5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C8124BBB-D016-4163-B26E-29FDF4A7FB5B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B7DB418F-DD7D-46F1-A072-FBD9BBB16889}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B7DB418F-DD7D-46F1-A072-FBD9BBB16889}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B7DB418F-DD7D-46F1-A072-FBD9BBB16889}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B7DB418F-DD7D-46F1-A072-FBD9BBB16889}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A1F7A3DF-CCE0-45EB-9459-0553E9FCAD05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A1F7A3DF-CCE0-45EB-9459-0553E9FCAD05}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A1F7A3DF-CCE0-45EB-9459-0553E9FCAD05}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A1F7A3DF-CCE0-45EB-9459-0553E9FCAD05}.Release|Any CPU.Build.0 = Release|Any CPU
-		{191F74A6-57D3-4E3D-AFA3-3FA53A305857}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{191F74A6-57D3-4E3D-AFA3-3FA53A305857}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{191F74A6-57D3-4E3D-AFA3-3FA53A305857}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{191F74A6-57D3-4E3D-AFA3-3FA53A305857}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7359DEF4-720A-4173-A061-0C84C99F5853}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7359DEF4-720A-4173-A061-0C84C99F5853}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7359DEF4-720A-4173-A061-0C84C99F5853}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7359DEF4-720A-4173-A061-0C84C99F5853}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FD69053-90C4-42D6-BF27-9F282EE3F50A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FD69053-90C4-42D6-BF27-9F282EE3F50A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FD69053-90C4-42D6-BF27-9F282EE3F50A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FD69053-90C4-42D6-BF27-9F282EE3F50A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A0BCB3A2-26D7-416C-A9FD-8F85E18BA8CF}
 	EndGlobalSection
 EndGlobal
