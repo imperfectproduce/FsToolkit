@@ -6,18 +6,14 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.11.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.11.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
-    <PackageReference Include="Unquote" Version="4.0.0" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="LinqTests.fs" />
     <Compile Include="SerializationTests.fs" />
     <Compile Include="Program.fs" />
+    <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FsToolkit.Json\FsToolkit.Json.fsproj" />
     <ProjectReference Include="..\FsToolkit\FsToolkit.fsproj" />
   </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
