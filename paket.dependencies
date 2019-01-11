@@ -4,7 +4,9 @@ framework: netstandard2.0
 
 nuget Newtonsoft.Json
 nuget Npgsql
-nuget NUnit
-nuget Unquote
+#nuget NUnit
+#nuget NUnit3TestAdapter
+#nuget Microsoft.NET.Test.Sdk
+#nuget Unquote
 nuget System.Configuration.ConfigurationManager
 nuget FSharp.Core 4.5.2 
