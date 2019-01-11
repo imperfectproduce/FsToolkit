@@ -1,3 +1,4 @@
+REDIRECTS: ON
 RESTRICTION: || (== netcoreapp2.2) (== netstandard2.0)
 NUGET
   remote: https://api.nuget.org/v3/index.json
