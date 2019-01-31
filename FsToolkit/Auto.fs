@@ -77,5 +77,5 @@ module Auto =
             if input = null then None
             else
                 let m = r.Match(input)
-                if m.Success then Some ([for x in m.Groups -> x] |> List.tail)
+                if m.Success then Some ([for x in m.Groups -> if x.Success then Some(x.Value) else None] |> List.tail)
                 else None
