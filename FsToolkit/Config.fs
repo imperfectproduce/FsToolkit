@@ -39,8 +39,8 @@ module Config =
     let private tryGetSettingDynamic (name: string) =
         let name = name.Trim()
         let cs = 
-            [getAppSetting
-             getEnvironmentVariable
+            [getEnvironmentVariable
+             getAppSetting
              getIniSetting AppDomain.CurrentDomain.BaseDirectory "app.ini"
              getIniSetting Environment.CurrentDirectory "app.ini"
              getIniSetting AppDomain.CurrentDomain.BaseDirectory "secrets.ini"
