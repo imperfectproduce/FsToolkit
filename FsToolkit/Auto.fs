@@ -70,3 +70,12 @@ module Auto =
             match uri.LastIndexOf '/' with
             | i when i > 0 && uri.Length > i -> uri.Substring(i + 1)
             | _ -> String.Empty
+
+    module Regex =
+        open System.Text.RegularExpressions
+        let (|Match|_|) (r:Regex) input =
+            if input = null then None
+            else
+                let m = r.Match(input)
+                if m.Success then Some ([for x in m.Groups -> if x.Success then Some(x.Value) else None] |> List.tail)
+                else None
