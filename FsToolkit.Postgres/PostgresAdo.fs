@@ -5,6 +5,7 @@ open NpgsqlTypes
 
 [<AutoOpen>]
 module PostgresAdo =
+
     ///Build a query param
     let inline P (name:string,ty:NpgsqlDbType,value:'a) =
         let np = new NpgsqlParameter(name, ty)
@@ -22,6 +23,7 @@ module PostgresAdo =
         | :? Guid as v -> P(name, NpgsqlDbType.Uuid, v)
         | :? Int32 as v -> P(name, NpgsqlDbType.Integer, v)
         | :? decimal as v -> P(name, NpgsqlDbType.Numeric, v)
+        | :? bool as v -> P(name, NpgsqlDbType.Boolean, v)
         | :? DateTime as v -> P(name, NpgsqlDbType.Timestamp, v)
         | :? DateTimeOffset as v -> P(name, NpgsqlDbType.TimestampTz, v)
         //None options
@@ -29,6 +31,7 @@ module PostgresAdo =
         | :? option<Guid> as v when v.IsNone -> P(name, NpgsqlDbType.Uuid, DBNull.Value)
         | :? option<Int32> as v when v.IsNone -> P(name, NpgsqlDbType.Integer, DBNull.Value)
         | :? option<decimal> as v when v.IsNone -> P(name, NpgsqlDbType.Numeric, DBNull.Value)
+        | :? option<bool> as v when v.IsNone -> P(name, NpgsqlDbType.Boolean, DBNull.Value)
         | :? option<DateTime> as v when v.IsNone -> P(name, NpgsqlDbType.Timestamp, DBNull.Value)
         | :? option<DateTimeOffset> as v when v.IsNone -> P(name, NpgsqlDbType.TimestampTz, DBNull.Value)
         //Some options
@@ -37,6 +40,7 @@ module PostgresAdo =
         | :? option<Guid> as v -> P(name, NpgsqlDbType.Uuid, v.Value)
         | :? option<Int32> as v -> P(name, NpgsqlDbType.Integer, v.Value)
         | :? option<decimal> as v -> P(name, NpgsqlDbType.Numeric, v.Value)
+        | :? option<bool> as v -> P(name, NpgsqlDbType.Boolean, v.Value)
         | :? option<DateTime> as v -> P(name, NpgsqlDbType.Timestamp, v.Value)
         | :? option<DateTimeOffset> as v -> P(name, NpgsqlDbType.TimestampTz, v.Value)
         //array-like
@@ -44,6 +48,7 @@ module PostgresAdo =
         | :? seq<Guid> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Uuid, v |> Seq.toArray)
         | :? seq<Int32> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Integer, v |> Seq.toArray)
         | :? seq<decimal> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Numeric, v |> Seq.toArray)
+        | :? seq<bool> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Boolean, v |> Seq.toArray)
         | :? seq<DateTime> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Timestamp, v |> Seq.toArray)
         | :? seq<DateTimeOffset> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.TimestampTz, v |> Seq.toArray)
         | v -> failwithf "Could not convert value to NpgsqlParameter: %A" v
