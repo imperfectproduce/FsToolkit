@@ -5,6 +5,64 @@ open NpgsqlTypes
 
 [<AutoOpen>]
 module PostgresAdo =
+    module Dynamic =
+        let readOption (r : NpgsqlDataReader) (n : string) : 't option =
+            let ordinal = r.GetOrdinal(n)
+            if r.IsDBNull(ordinal) then
+                None
+            else
+                let value = r.GetFieldValue<'t>(ordinal)
+                if Object.ReferenceEquals(value, null) then
+                    None
+                else
+                    Some(value)
+
+        let readObj (r : NpgsqlDataReader) (n : string) : 't =
+            let ordinal = r.GetOrdinal(n)
+            if r.IsDBNull(ordinal) then
+                null : 't
+            else
+                r.GetFieldValue<'t>(ordinal)
+
+        let readValue (r : NpgsqlDataReader) (n : string) : 't =
+            let ordinal = r.GetOrdinal(n)
+            r.GetFieldValue<'t>(ordinal)
+
+        let readDynamic (r : NpgsqlDataReader) (n : string) : 't =
+            let tty = typeof<'t>
+            if tty = typeof<string> then
+                (readObj r n : string) :> obj :?> 't
+            elif tty = typeof<Guid> then
+                (readValue r n : Guid) :> obj :?> 't
+            elif tty = typeof<Int32> then
+                (readValue r n : Int32) :> obj :?> 't
+            elif tty = typeof<decimal> then
+                (readValue r n : decimal) :> obj :?> 't
+            elif tty = typeof<bool> then
+                (readValue r n : bool) :> obj :?> 't
+            elif tty = typeof<DateTime> then
+                (readValue r n : DateTime) :> obj :?> 't
+            elif tty = typeof<DateTimeOffset> then
+                (readValue r n : DateTimeOffset) :> obj :?> 't
+            elif tty = typeof<string option> then
+                (readOption r n : string option) :> obj :?> 't
+            elif tty = typeof<Guid option> then
+                (readOption r n : Guid option) :> obj :?> 't
+            elif tty = typeof<Int32 option> then
+                (readOption r n : Int32 option) :> obj :?> 't
+            elif tty = typeof<decimal option> then
+                (readOption r n : decimal option) :> obj :?> 't
+            elif tty = typeof<bool option> then
+                (readOption r n : bool option) :> obj :?> 't
+            elif tty = typeof<DateTime option> then
+                (readOption r n : DateTime option) :> obj :?> 't
+            elif tty = typeof<DateTimeOffset option> then
+                (readOption r n : DateTimeOffset option) :> obj :?> 't
+            else
+                failwithf "Unexpected type encountered when reading NpgsqlDataReader value: %A" tty
+
+        let inline (?) (r : NpgsqlDataReader) (n : string) : 't =
+            readDynamic r n
 
     ///Build a query param
     let inline P (name:string,ty:NpgsqlDbType,value:'a) =
