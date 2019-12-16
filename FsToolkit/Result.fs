@@ -1,27 +1,24 @@
 ﻿namespace FsToolkit
 
-//Matches definition from https://github.com/Microsoft/visualfsharp/pull/964
-///Type for Railway Oriented Programming: http://fsharpforfunandprofit.com/posts/recipe-part2/
-[<StructuralEquality; StructuralComparison>]
-[<CompiledName("FSharpResult`2")>]
-type Result<'T,'TError> = 
-    | Ok of 'T 
-    | Error of 'TError
+///A basic Result builder
+type ResultBuilder () =
+    member this.Bind(x, f) = Result.bind f x
+    member this.ReturnFrom(x:Result<_,_>) = x
+    member this.Return x = Ok x
+    member this.Zero () = Ok ()
 
+[<AutoOpen>]
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+module ResultBuilder =
+    ///A builder for Result<'T,'TError> types
+    let result = ResultBuilder ()
+
+///Extensions to the Result module in FSharp.Core
 module Result =
-    let bind f r =
-        match r with
-        | Ok x -> f(x)
-        | Error x -> Error x
-    let (>>=) r f = bind f r
+    let (>>=) r f = Result.bind f r
 
     let switch f x = 
         f x |> Ok
-
-    let map f r =
-        match r with
-        | Ok x -> Ok(f x)
-        | Error x -> Error x
 
     let partition rs =
         let isOk r =
