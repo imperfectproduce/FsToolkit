@@ -1,10 +1,10 @@
-#FsToolkit.Json
+# FsToolkit.Json
 
 Various helpers that make working with JSON easier using F#. Built on top of `Newtonsoft.Json`
 
 NuGet package feed: https://ci.appveyor.com/nuget/fstoolkit-json
 
-##FsToolkit.Json.Linq
+## FsToolkit.Json.Linq
 
 Features a `(?)` implementation (dynamic operator) that makes manipulating parsed `JObject`s super easy
   - Handles `null` and missing properties the same
@@ -14,7 +14,7 @@ Features a `(?)` implementation (dynamic operator) that makes manipulating parse
   - Collection return type intuitive conversion
   - Case-insensitive property selection (but preferring case-sensitive match) 
 
-##FsToolkit.Json.Converters
+## FsToolkit.Json.Converters
 
 A set of `JsonConverter` implementations for better client and / or storage serialization of exotic F# types.
 
@@ -23,8 +23,16 @@ A set of `JsonConverter` implementations for better client and / or storage seri
   - `StorageDUConverter` serializes DUs as flat objects with explicit fields names when given, and normalized auto-field names otherwise
   - `ClientDUConverter` serializes DUs as flat objects with explicit field names when given. "enum-like" DUs (all cases lack fields) are serialized as case-name strings. Single-field DUs without explicit field name are serialized with `value` field name.
   
-##FsToolkit.Json.Serialization
+## FsToolkit.Json.Serialization
 
 An _opinionated_ set of helpers for serialization and deserializing exotic F# types.
 
-Distinguishes between three types of serialization targets: Client, Storage, and Transfer. Provides `ClientIgnore` and `StorageIgnore` attributes for controlling fields used in object serialization.
+Distinguishes between three types of serialization targets: `Client`, `Storage`, and `Transfer`. Provides `ClientIgnore` and `StorageIgnore` attributes for controlling fields used in object serialization.
+
+For example, to serialize an F# tuple involving option types in a client-friendly way (i.e. camcelCase and using `OptionConverter` and `TupleConverter` implementations for nice F# type representation), you can do:
+
+```
+> (1, Some(2), None: int option) |> serialize Client;;
+
+val it : string = "[1, 2, null]"
+```
