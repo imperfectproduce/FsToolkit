@@ -154,7 +154,7 @@ module PostgresAdo =
         for p in ps do
             cmd.Parameters.Add(p) |> ignore
         let result = cmd.ExecuteScalar()
-        if result = null
+        if result = null || result.GetType() = typeof<DBNull>
         then None
         else Some(result)
 
