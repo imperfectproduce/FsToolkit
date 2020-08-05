@@ -1,19 +1,24 @@
 ﻿namespace FsToolkit
 
+///A basic Result builder
+type ResultBuilder () =
+    member this.Bind(x, f) = Result.bind f x
+    member this.ReturnFrom(x:Result<_,_>) = x
+    member this.Return x = Ok x
+    member this.Zero () = Ok ()
+
+[<AutoOpen>]
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+module ResultBuilder =
+    ///A builder for Result<'T,'TError> types
+    let result = ResultBuilder ()
+
+///Extensions to the Result module in FSharp.Core
 module Result =
-    let bind f r =
-        match r with
-        | Ok x -> f(x)
-        | Error x -> Error x
-    let (>>=) r f = bind f r
+    let (>>=) r f = Result.bind f r
 
-    let switch f x = 
+    let switch f x =
         f x |> Ok
-
-    let map f r =
-        match r with
-        | Ok x -> Ok(f x)
-        | Error x -> Error x
 
     let partition rs =
         let isOk r =
@@ -54,7 +59,7 @@ module AsyncResult =
     let map f r = async {
         let! r = r
         match r with
-        | Ok x -> 
+        | Ok x ->
             let! x' = f x
             return Ok(x')
         | Error x -> return Error x
