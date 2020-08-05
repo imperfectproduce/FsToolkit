@@ -11,13 +11,16 @@ open System.Text.RegularExpressions
 //TODO
 // - content-type headers for response
 
+///Models an HTTP request
 type FastRequest = {
     Method : string
-    ///The Url (query string params overwritten if Query is non-empty)
+    ///The request URL (query string params overwritten if Query is non-empty)
     Url: string
     ///The (unescaped) query string params (if non-empty overwrites Url query string params)
     QueryParams : (string * string) list
+    ///The request headers as (key * value) pairs (duplicates are allowed)
     Headers : (string * string) list
+    ///The request body
     Body : string
     ///The request / response timeout (ignored if an CancellationToken is given)
     Timeout : TimeSpan
@@ -47,19 +50,27 @@ type FastRequest = {
         EscapeQueryParams = true
     }
 
+///Models an HTTP response
 type FastResponse = {
+    ///The request URL
     RequestUrl : string
+    ///The response status code
     StatusCode : int
+    ///The response headers as (key * value) pairs (duplicate keys are possible)
     Headers : (string * string) list
+    ///The response decoded as a string
     Body : string
     ///A measure of the total time from begin sending request to end reading response
     Elapsed : TimeSpan
-} with 
+} with
+    ///Determines whether the StatusCode is within the 200-range
     member this.Is2xx =
         this.StatusCode >= 200 && this.StatusCode <= 299
+    ///Raises an HttpRequestException with details about the FastResponse
     member this.Fail() =
         let msg = sprintf "The remote server response was rejected by caller: %i. Response from %s: %s" this.StatusCode this.RequestUrl this.Body
         raise <| HttpRequestException(msg)
+    ///Raises an HttpRequestException is the StatusCode is outside of the 200-range
     member this.Ensure2xx() =
         if this.Is2xx |> not then
             this.Fail()
@@ -71,17 +82,24 @@ module ResponsePatterns =
         then Some response
         else None
 
+    ///Match succeeds if response status code is in the 200-range
     let (|Status2xx|_|) (response:FastResponse) =
         if response.Is2xx 
         then Some response
         else None
 
+    ///400 Bad Request
     let (|Status400|_|) = statusOption 400
+    ///401 Unauthorized
     let (|Status401|_|) = statusOption 401
+    ///403 Forbidden
     let (|Status403|_|) = statusOption 403
+    ///404 Not Found
     let (|Status404|_|) = statusOption 404
+    ///422 Unprocessable Entity
     let (|Status422|_|) = statusOption 422
 
+///Perform HTTP operations optimized for speed and ergonomics
 module FastHttp =
 
     ///Apply global (ServicePointManager) optimizations: call this once at application startup.
@@ -132,6 +150,7 @@ module FastHttp =
         | None ->
             new StringContent(fastRequest.Body, utf8Encoding fastRequest.IncludeUtf8Bom, "text/plain")
 
+    ///Send a FastRequest asynchronously and receive a FastResponse
     let sendAsync fastRequest = async {
         use request = new HttpRequestMessage()
         request.RequestUri <- 
@@ -187,4 +206,5 @@ module FastHttp =
         return fastResponse
     }
 
+    ///Send a FastRequest synchronously and receive a FastResponse
     let send = sendAsync>>Async.RunSynchronously
