@@ -5,11 +5,13 @@
     <version>5.1.$build_number$</version>
     <description>Json helpers, mostly built on top of Newtonsoft.Json</description>
     <authors>Imperfect Foods</authors>
-	<licenseUrl>https://raw.githubusercontent.com/relayfoods/FsToolkit/master/LICENSE</licenseUrl>
-	<projectUrl>https://github.com/relayfoods/FsToolkit</projectUrl>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/imperfectproduce/FsToolkit</projectUrl>
 	<dependencies>
+      <group targetFramework="netstandard2.0">
 		<dependency id="Newtonsoft.Json" version="12.0.3" />
 		<dependency id="FSharp.Core" version="4.7.2" />
+      </group>
 	</dependencies>
   </metadata>
   <files>

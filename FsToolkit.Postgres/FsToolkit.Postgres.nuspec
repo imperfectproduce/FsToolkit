@@ -5,11 +5,13 @@
     <version>5.1.$build_number$</version>
     <description>Postgres helpers, mostly built on top of Npgsql</description>
     <authors>Impefect Foods</authors>
-	<licenseUrl>https://raw.githubusercontent.com/relayfoods/FsToolkit/master/LICENSE</licenseUrl>
-	<projectUrl>https://github.com/relayfoods/FsToolkit</projectUrl>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/imperfectproduce/FsToolkit</projectUrl>
 	<dependencies>
+      <group targetFramework="netstandard2.0">
 		<dependency id="FSharp.Core" version="4.7.2" />
 		<dependency id="Npgsql" version="4.1.5" />
+      </group>
 	</dependencies>
   </metadata>
   <files>
