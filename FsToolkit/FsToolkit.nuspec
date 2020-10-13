@@ -2,14 +2,14 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>FsToolkit</id>
-    <version>5.0.0-alpha$build_number$</version>
+    <version>5.1.$build_number$</version>
     <description>Basic helpers with no dependencies</description>
-    <authors>Imperfect Produce</authors>
+    <authors>Imperfect Foods</authors>
     <licenseUrl>https://raw.githubusercontent.com/relayfoods/FsToolkit/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/relayfoods/FsToolkit</projectUrl>
     <dependencies>
-        <dependency id="FSharp.Core" version="4.5.2" />
-        <dependency id="System.Configuration.ConfigurationManager" version="4.5.0" />
+        <dependency id="FSharp.Core" version="4.7.2" />
+        <dependency id="System.Configuration.ConfigurationManager" version="4.7" />
     </dependencies>
   </metadata>
   <files>
