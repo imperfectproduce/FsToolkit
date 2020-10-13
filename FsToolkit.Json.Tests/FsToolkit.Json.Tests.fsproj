@@ -1,14 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <IsPackable>false</IsPackable>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="LinqTests.fs" />
     <Compile Include="SerializationTests.fs" />
-    <Compile Include="Program.fs" />
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>

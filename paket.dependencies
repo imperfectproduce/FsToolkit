@@ -1,6 +1,6 @@
 redirects: on
 source https://api.nuget.org/v3/index.json
-framework: netstandard2.0, netcoreapp2.2
+framework: netstandard2.0, netcoreapp3.1
 
 nuget Newtonsoft.Json
 nuget Npgsql
@@ -9,4 +9,4 @@ nuget NUnit3TestAdapter
 nuget Microsoft.NET.Test.Sdk
 nuget Unquote
 nuget System.Configuration.ConfigurationManager
-nuget FSharp.Core 4.5.2 
+nuget FSharp.Core
