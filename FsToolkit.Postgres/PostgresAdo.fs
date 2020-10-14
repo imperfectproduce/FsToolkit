@@ -73,10 +73,21 @@ module PostgresAdo =
     ///Build a query param with NpgsqlSqlDbType automatically detected and nulls and
     ///option types automatically handled.
     let P' (name:string, value: 'a) =
+        let aty = typeof<'a>
         let value = value :> obj
         match value with
+        // nulls
+        | null when aty = typeof<string> ->
+            P(name, NpgsqlDbType.Text, DBNull.Value)
+        //None options (note: for some reason, patterns like `:? option<Guid> as v when v.IsNone` do not work)
+        | null when aty = typeof<option<string>> -> P(name, NpgsqlDbType.Text, DBNull.Value)
+        | null when aty = typeof<option<Guid>> -> P(name, NpgsqlDbType.Uuid, DBNull.Value)
+        | null when aty = typeof<option<Int32>> -> P(name, NpgsqlDbType.Integer, DBNull.Value)
+        | null when aty = typeof<option<decimal>> -> P(name, NpgsqlDbType.Numeric, DBNull.Value)
+        | null when aty = typeof<option<bool>> -> P(name, NpgsqlDbType.Boolean, DBNull.Value)
+        | null when aty = typeof<option<DateTime>> -> P(name, NpgsqlDbType.Timestamp, DBNull.Value)
+        | null when aty = typeof<option<DateTimeOffset>> -> P(name, NpgsqlDbType.TimestampTz, DBNull.Value)
         //atoms
-        | :? string as v when v = null -> P(name, NpgsqlDbType.Text, DBNull.Value)
         | :? string as v ->  P(name, NpgsqlDbType.Text, v)
         | :? Guid as v -> P(name, NpgsqlDbType.Uuid, v)
         | :? Int32 as v -> P(name, NpgsqlDbType.Integer, v)
@@ -84,14 +95,6 @@ module PostgresAdo =
         | :? bool as v -> P(name, NpgsqlDbType.Boolean, v)
         | :? DateTime as v -> P(name, NpgsqlDbType.Timestamp, v)
         | :? DateTimeOffset as v -> P(name, NpgsqlDbType.TimestampTz, v)
-        //None options
-        | :? option<string> as v when v.IsNone -> P(name, NpgsqlDbType.Text, DBNull.Value)
-        | :? option<Guid> as v when v.IsNone -> P(name, NpgsqlDbType.Uuid, DBNull.Value)
-        | :? option<Int32> as v when v.IsNone -> P(name, NpgsqlDbType.Integer, DBNull.Value)
-        | :? option<decimal> as v when v.IsNone -> P(name, NpgsqlDbType.Numeric, DBNull.Value)
-        | :? option<bool> as v when v.IsNone -> P(name, NpgsqlDbType.Boolean, DBNull.Value)
-        | :? option<DateTime> as v when v.IsNone -> P(name, NpgsqlDbType.Timestamp, DBNull.Value)
-        | :? option<DateTimeOffset> as v when v.IsNone -> P(name, NpgsqlDbType.TimestampTz, DBNull.Value)
         //Some options
         | :? option<string> as v when v.Value = null -> P(name, NpgsqlDbType.Text, DBNull.Value)
         | :? option<string> as v -> P(name, NpgsqlDbType.Text, v.Value)
@@ -102,6 +105,7 @@ module PostgresAdo =
         | :? option<DateTime> as v -> P(name, NpgsqlDbType.Timestamp, v.Value)
         | :? option<DateTimeOffset> as v -> P(name, NpgsqlDbType.TimestampTz, v.Value)
         //array-like
+        //TODO Q: if we have a seq of strings that contains nulls, do we need to map to DbNull.Value?
         | :? seq<string> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Text, v |> Seq.toArray)
         | :? seq<Guid> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Uuid, v |> Seq.toArray)
         | :? seq<Int32> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Integer, v |> Seq.toArray)
