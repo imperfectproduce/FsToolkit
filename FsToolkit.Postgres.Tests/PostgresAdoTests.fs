@@ -4,7 +4,6 @@ open System
 open NpgsqlTypes
 open Swensen.Unquote
 open NUnit.Framework
-open Newtonsoft.Json.Linq
 open FsToolkit.Postgres
 
 module PostgresAdoTests =
@@ -20,26 +19,30 @@ module PostgresAdoTests =
     let ``P' type scenarios`` () =
         let scenarios = [
             //string scenarios
-            P'("x", "hello"), NpgsqlDbType.Text
-            P'("x", (null:string)), NpgsqlDbType.Text
+            P'("x", "hello"), (NpgsqlDbType.Text, "hello" :> obj)
+            P'("x", (null:string)), (NpgsqlDbType.Text, DBNull.Value :> obj)
+            P'("x", (None:string option)), (NpgsqlDbType.Text, DBNull.Value :> obj)
+            P'("x", (Some(null):string option)), (NpgsqlDbType.Text, DBNull.Value :> obj)
 
             //integer scenarios
-            P'("x", 3), NpgsqlDbType.Integer
-            P'("x", Some(3)), NpgsqlDbType.Integer
-            P'("x", (None:int option)), NpgsqlDbType.Integer
+            P'("x", 3), (NpgsqlDbType.Integer, 3 :> obj)
+            P'("x", Some(3)), (NpgsqlDbType.Integer, 3 :> obj)
+            P'("x", (None:int option)), (NpgsqlDbType.Integer, DBNull.Value :> obj)
 
             //decimal scenarios
-            P'("x", 3.2m), NpgsqlDbType.Numeric
-            P'("x", Some(3.2m)), NpgsqlDbType.Numeric
-            P'("x", (None:decimal option)), NpgsqlDbType.Numeric
+            P'("x", 3.2m), (NpgsqlDbType.Numeric, 3.2m :> obj)
+            P'("x", Some(3.2m)), (NpgsqlDbType.Numeric, 3.2m :> obj)
+            P'("x", (None:decimal option)), (NpgsqlDbType.Numeric, DBNull.Value :> obj)
 
             //array scenarios
-            P'("x", ["x"; "y"; "z"]), NpgsqlDbType.Array ||| NpgsqlDbType.Text
-            P'("x", seq { "x"; "y"; "z" }), NpgsqlDbType.Array ||| NpgsqlDbType.Text
-            P'("x", Set [ "x"; "y"; "z" ]), NpgsqlDbType.Array ||| NpgsqlDbType.Text
-            P'("x", [| "x"; "y"; "z" |]), NpgsqlDbType.Array ||| NpgsqlDbType.Text
-            P'("x", [1;2;3]), NpgsqlDbType.Array ||| NpgsqlDbType.Integer
+            let xyzArray = [|"x"; "y"; "z"|] :> obj
+            P'("x", ["x"; "y"; "z"]), (NpgsqlDbType.Array ||| NpgsqlDbType.Text, xyzArray)
+            P'("x", seq { "x"; "y"; "z" }), (NpgsqlDbType.Array ||| NpgsqlDbType.Text, xyzArray)
+            P'("x", Set [ "x"; "y"; "z" ]), (NpgsqlDbType.Array ||| NpgsqlDbType.Text, xyzArray)
+            P'("x", [| "x"; "y"; "z" |]), (NpgsqlDbType.Array ||| NpgsqlDbType.Text, xyzArray)
+            P'("x", [1;2;3]), (NpgsqlDbType.Array ||| NpgsqlDbType.Integer, [|1;2;3|] :> obj)
         ]
 
-        for actualDbParam, expectedDbType in scenarios do
+        for actualDbParam, (expectedDbType, expectedDbValue) in scenarios do
             test <@ actualDbParam.NpgsqlDbType = expectedDbType @>
+            test <@ actualDbParam.NpgsqlValue = expectedDbValue @>
