@@ -105,7 +105,7 @@ module PostgresAdo =
         | :? option<DateTime> as v -> P(name, NpgsqlDbType.Timestamp, v.Value)
         | :? option<DateTimeOffset> as v -> P(name, NpgsqlDbType.TimestampTz, v.Value)
         //array-like
-        //TODO Q: if we have a seq of strings that contains nulls, do we need to map to DbNull.Value?
+        //note: null string values in arrays _are_ properly handled
         | :? seq<string> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Text, v |> Seq.toArray)
         | :? seq<Guid> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Uuid, v |> Seq.toArray)
         | :? seq<Int32> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Integer, v |> Seq.toArray)
@@ -166,38 +166,38 @@ module PostgresAdo =
         reader.GetFieldValue<'a>(0)
 
     let read2<'a,'b> (reader:NpgsqlDataReader) =
-        reader.GetFieldValue<'a>(0), 
+        reader.GetFieldValue<'a>(0),
         reader.GetFieldValue<'b>(1)
 
     let read3<'a,'b,'c> (reader:NpgsqlDataReader) =
-        reader.GetFieldValue<'a>(0), 
-        reader.GetFieldValue<'b>(1), 
+        reader.GetFieldValue<'a>(0),
+        reader.GetFieldValue<'b>(1),
         reader.GetFieldValue<'c>(2)
 
     let read4<'a,'b,'c,'d> (reader:NpgsqlDataReader) =
-        reader.GetFieldValue<'a>(0), 
-        reader.GetFieldValue<'b>(1), 
+        reader.GetFieldValue<'a>(0),
+        reader.GetFieldValue<'b>(1),
         reader.GetFieldValue<'c>(2),
         reader.GetFieldValue<'d>(3)
 
     let read5<'a,'b,'c,'d,'e> (reader:NpgsqlDataReader) =
-        reader.GetFieldValue<'a>(0), 
-        reader.GetFieldValue<'b>(1), 
+        reader.GetFieldValue<'a>(0),
+        reader.GetFieldValue<'b>(1),
         reader.GetFieldValue<'c>(2),
         reader.GetFieldValue<'d>(3),
         reader.GetFieldValue<'e>(4)
 
     let read6<'a,'b,'c,'d,'e,'f> (reader:NpgsqlDataReader) =
-        reader.GetFieldValue<'a>(0), 
-        reader.GetFieldValue<'b>(1), 
+        reader.GetFieldValue<'a>(0),
+        reader.GetFieldValue<'b>(1),
         reader.GetFieldValue<'c>(2),
         reader.GetFieldValue<'d>(3),
         reader.GetFieldValue<'e>(4),
         reader.GetFieldValue<'f>(5)
 
     let read7<'a,'b,'c,'d,'e,'f,'g> (reader:NpgsqlDataReader) =
-        reader.GetFieldValue<'a>(0), 
-        reader.GetFieldValue<'b>(1), 
+        reader.GetFieldValue<'a>(0),
+        reader.GetFieldValue<'b>(1),
         reader.GetFieldValue<'c>(2),
         reader.GetFieldValue<'d>(3),
         reader.GetFieldValue<'e>(4),
