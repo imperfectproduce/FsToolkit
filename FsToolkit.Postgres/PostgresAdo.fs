@@ -61,6 +61,8 @@ module PostgresAdo =
             else
                 failwithf "Unexpected type encountered when reading NpgsqlDataReader value: %A" tty
 
+        ///Dynamically read column value by name from an NpgsqlDataReader converting the value
+        ///from the NpgsqlDbType to the generic argument type. Handles nulls and option types intuitively.
         let inline (?) (r : NpgsqlDataReader) (n : string) : 't =
             readDynamic r n
 
@@ -70,8 +72,8 @@ module PostgresAdo =
         np.Value <- value :> obj
         np
 
-    ///Build a query param with NpgsqlSqlDbType automatically detected and nulls and
-    ///option types automatically handled.
+    ///Build a query param with NpgsqlDbType automatically detected and nulls,
+    ///option, and sequence types automatically handled.
     let P' (name:string, value: 'a) =
         let aty = typeof<'a>
         let value = value :> obj
@@ -204,7 +206,7 @@ module PostgresAdo =
         reader.GetFieldValue<'f>(5),
         reader.GetFieldValue<'g>(6)
 
-    ///Execute the given function with an open connection
+    ///Execute the given function with an open connection which is disposed after completion
     let doWithOpenConn (getConn:unit -> NpgsqlConnection) f =
         use conn = getConn ()
         conn.Open()
