@@ -29,6 +29,11 @@ module PostgresAdoTests =
             P'("x", Some(3)), (NpgsqlDbType.Integer, 3 :> obj)
             P'("x", (None:int option)), (NpgsqlDbType.Integer, DBNull.Value :> obj)
 
+            //int64 scenarios
+            P'("x", 3L), (NpgsqlDbType.Bigint, 3L :> obj)
+            P'("x", Some(3L)), (NpgsqlDbType.Bigint, 3L :> obj)
+            P'("x", (None:int64 option)), (NpgsqlDbType.Bigint, DBNull.Value :> obj)
+
             //decimal scenarios
             P'("x", 3.2m), (NpgsqlDbType.Numeric, 3.2m :> obj)
             P'("x", Some(3.2m)), (NpgsqlDbType.Numeric, 3.2m :> obj)
