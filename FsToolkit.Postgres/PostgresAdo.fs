@@ -36,6 +36,8 @@ module PostgresAdo =
                 (readValue r n : Guid) :> obj :?> 't
             elif tty = typeof<Int32> then
                 (readValue r n : Int32) :> obj :?> 't
+            elif tty = typeof<Int64> then
+                (readValue r n : Int64) :> obj :?> 't
             elif tty = typeof<decimal> then
                 (readValue r n : decimal) :> obj :?> 't
             elif tty = typeof<bool> then
@@ -50,6 +52,8 @@ module PostgresAdo =
                 (readOption r n : Guid option) :> obj :?> 't
             elif tty = typeof<Int32 option> then
                 (readOption r n : Int32 option) :> obj :?> 't
+            elif tty = typeof<Int64 option> then
+                (readOption r n : Int64 option) :> obj :?> 't
             elif tty = typeof<decimal option> then
                 (readOption r n : decimal option) :> obj :?> 't
             elif tty = typeof<bool option> then
@@ -85,6 +89,7 @@ module PostgresAdo =
         | null when aty = typeof<option<string>> -> P(name, NpgsqlDbType.Text, DBNull.Value)
         | null when aty = typeof<option<Guid>> -> P(name, NpgsqlDbType.Uuid, DBNull.Value)
         | null when aty = typeof<option<Int32>> -> P(name, NpgsqlDbType.Integer, DBNull.Value)
+        | null when aty = typeof<option<Int64>> -> P(name, NpgsqlDbType.Bigint, DBNull.Value)
         | null when aty = typeof<option<decimal>> -> P(name, NpgsqlDbType.Numeric, DBNull.Value)
         | null when aty = typeof<option<bool>> -> P(name, NpgsqlDbType.Boolean, DBNull.Value)
         | null when aty = typeof<option<DateTime>> -> P(name, NpgsqlDbType.Timestamp, DBNull.Value)
@@ -93,6 +98,7 @@ module PostgresAdo =
         | :? string as v ->  P(name, NpgsqlDbType.Text, v)
         | :? Guid as v -> P(name, NpgsqlDbType.Uuid, v)
         | :? Int32 as v -> P(name, NpgsqlDbType.Integer, v)
+        | :? Int64 as v -> P(name, NpgsqlDbType.Bigint, v)
         | :? decimal as v -> P(name, NpgsqlDbType.Numeric, v)
         | :? bool as v -> P(name, NpgsqlDbType.Boolean, v)
         | :? DateTime as v -> P(name, NpgsqlDbType.Timestamp, v)
@@ -102,6 +108,7 @@ module PostgresAdo =
         | :? option<string> as v -> P(name, NpgsqlDbType.Text, v.Value)
         | :? option<Guid> as v -> P(name, NpgsqlDbType.Uuid, v.Value)
         | :? option<Int32> as v -> P(name, NpgsqlDbType.Integer, v.Value)
+        | :? option<Int64> as v -> P(name, NpgsqlDbType.Bigint, v.Value)
         | :? option<decimal> as v -> P(name, NpgsqlDbType.Numeric, v.Value)
         | :? option<bool> as v -> P(name, NpgsqlDbType.Boolean, v.Value)
         | :? option<DateTime> as v -> P(name, NpgsqlDbType.Timestamp, v.Value)
@@ -111,6 +118,7 @@ module PostgresAdo =
         | :? seq<string> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Text, v |> Seq.toArray)
         | :? seq<Guid> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Uuid, v |> Seq.toArray)
         | :? seq<Int32> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Integer, v |> Seq.toArray)
+        | :? seq<Int64> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Bigint, v |> Seq.toArray)
         | :? seq<decimal> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Numeric, v |> Seq.toArray)
         | :? seq<bool> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Boolean, v |> Seq.toArray)
         | :? seq<DateTime> as v -> P(name, NpgsqlDbType.Array ||| NpgsqlDbType.Timestamp, v |> Seq.toArray)
