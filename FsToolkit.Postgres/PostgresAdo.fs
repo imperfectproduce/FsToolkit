@@ -7,7 +7,7 @@ open NpgsqlTypes
 [<AutoOpen>]
 module PostgresAdo =
     module Dynamic =
-        let readOption (r : NpgsqlDataReader) (n : string) : 't option =
+        let readOption (r : DbDataReader) (n : string) : 't option =
             let ordinal = r.GetOrdinal(n)
             if r.IsDBNull(ordinal) then
                 None
@@ -18,18 +18,18 @@ module PostgresAdo =
                 else
                     Some(value)
 
-        let readObj (r : NpgsqlDataReader) (n : string) : 't =
+        let readObj (r : DbDataReader) (n : string) : 't =
             let ordinal = r.GetOrdinal(n)
             if r.IsDBNull(ordinal) then
                 null : 't
             else
                 r.GetFieldValue<'t>(ordinal)
 
-        let readValue (r : NpgsqlDataReader) (n : string) : 't =
+        let readValue (r : DbDataReader) (n : string) : 't =
             let ordinal = r.GetOrdinal(n)
             r.GetFieldValue<'t>(ordinal)
 
-        let readDynamic (r : NpgsqlDataReader) (n : string) : 't =
+        let readDynamic (r : DbDataReader) (n : string) : 't =
             let tty = typeof<'t>
             if tty = typeof<string> then
                 (readObj r n : string) :> obj :?> 't
@@ -64,11 +64,11 @@ module PostgresAdo =
             elif tty = typeof<DateTimeOffset option> then
                 (readOption r n : DateTimeOffset option) :> obj :?> 't
             else
-                failwithf "Unexpected type encountered when reading NpgsqlDataReader value: %A" tty
+                failwithf "Unexpected type encountered when reading DbDataReader value: %A" tty
 
-        ///Dynamically read column value by name from an NpgsqlDataReader converting the value
+        ///Dynamically read column value by name from an DbDataReader converting the value
         ///from the NpgsqlDbType to the generic argument type. Handles nulls and option types intuitively.
-        let inline (?) (r : NpgsqlDataReader) (n : string) : 't =
+        let inline (?) (r : DbDataReader) (n : string) : 't =
             readDynamic r n
 
     ///Build a query param
@@ -177,7 +177,7 @@ module PostgresAdo =
         cmd.CommandText <- sql
         for p in ps do
             cmd.Parameters.Add(p) |> ignore
-        use reader = cmd.ExecuteReader()
+        use! reader = cmd.ExecuteReaderAsync() |> Async.AwaitTask
         let! rows = readRowsAsync reader read
         return
             match rows with
@@ -245,32 +245,32 @@ module PostgresAdo =
             else Some(result)
     }
 
-    let read1<'a> (reader:NpgsqlDataReader) =
+    let read1<'a> (reader:DbDataReader) =
         reader.GetFieldValue<'a>(0)
 
-    let read2<'a,'b> (reader:NpgsqlDataReader) =
+    let read2<'a,'b> (reader:DbDataReader) =
         reader.GetFieldValue<'a>(0),
         reader.GetFieldValue<'b>(1)
 
-    let read3<'a,'b,'c> (reader:NpgsqlDataReader) =
+    let read3<'a,'b,'c> (reader:DbDataReader) =
         reader.GetFieldValue<'a>(0),
         reader.GetFieldValue<'b>(1),
         reader.GetFieldValue<'c>(2)
 
-    let read4<'a,'b,'c,'d> (reader:NpgsqlDataReader) =
+    let read4<'a,'b,'c,'d> (reader:DbDataReader) =
         reader.GetFieldValue<'a>(0),
         reader.GetFieldValue<'b>(1),
         reader.GetFieldValue<'c>(2),
         reader.GetFieldValue<'d>(3)
 
-    let read5<'a,'b,'c,'d,'e> (reader:NpgsqlDataReader) =
+    let read5<'a,'b,'c,'d,'e> (reader:DbDataReader) =
         reader.GetFieldValue<'a>(0),
         reader.GetFieldValue<'b>(1),
         reader.GetFieldValue<'c>(2),
         reader.GetFieldValue<'d>(3),
         reader.GetFieldValue<'e>(4)
 
-    let read6<'a,'b,'c,'d,'e,'f> (reader:NpgsqlDataReader) =
+    let read6<'a,'b,'c,'d,'e,'f> (reader:DbDataReader) =
         reader.GetFieldValue<'a>(0),
         reader.GetFieldValue<'b>(1),
         reader.GetFieldValue<'c>(2),
@@ -278,7 +278,7 @@ module PostgresAdo =
         reader.GetFieldValue<'e>(4),
         reader.GetFieldValue<'f>(5)
 
-    let read7<'a,'b,'c,'d,'e,'f,'g> (reader:NpgsqlDataReader) =
+    let read7<'a,'b,'c,'d,'e,'f,'g> (reader:DbDataReader) =
         reader.GetFieldValue<'a>(0),
         reader.GetFieldValue<'b>(1),
         reader.GetFieldValue<'c>(2),
@@ -295,7 +295,9 @@ module PostgresAdo =
 
     ///Execute the given function with an asynchronously opened connection which is disposed after completion
     let doWithOpenConnAsync (getConn:unit -> NpgsqlConnection) f = async {
-        use conn = getConn ()
+        let conn = getConn ()
         do! conn.OpenAsync() |> Async.AwaitTask
-        return! f conn
+        let! result = f conn
+        do! conn.CloseAsync() |> Async.AwaitTask
+        return result
     }
