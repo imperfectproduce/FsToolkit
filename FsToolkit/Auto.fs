@@ -2,6 +2,7 @@
 
 open System
 open System.Collections.Generic
+open System.Threading.Tasks
 
 [<AutoOpen>]
 module Auto =
@@ -87,3 +88,16 @@ module Auto =
                 let m = r.Match(input)
                 if m.Success then Some ([for x in m.Groups -> if x.Success then Some(x.Value) else None] |> List.tail)
                 else None
+
+    module Async =
+        let map f workflow = async {
+            let! res = workflow
+            return f res }
+
+        let bind f workflow = async {
+            let! res = workflow
+            return! f res }
+
+        ///Start an F# Async<unit> as a C#-compatible Task which is be run by NUnit as a test method.
+        let StartAsyncUnitAsTask (x: Async<unit>) : Task =
+            upcast(x |> Async.StartAsTask)
