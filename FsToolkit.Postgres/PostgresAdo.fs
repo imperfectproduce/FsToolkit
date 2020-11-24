@@ -1,5 +1,6 @@
 ﻿namespace FsToolkit.Postgres
 open System
+open System.Data.Common
 open Npgsql
 open NpgsqlTypes
 
@@ -134,7 +135,32 @@ module PostgresAdo =
         use reader = cmd.ExecuteReader()
         [ while reader.Read() do yield read reader ]
 
-    ///Execute a select query
+
+    ///read rows from an open data reader to completion
+    let private readRowsAsync (reader: DbDataReader) read = async {
+        let rec loop rows = async {
+            let! hasRow = reader.ReadAsync() |> Async.AwaitTask
+            if hasRow then
+                return! loop ((read reader)::rows)
+            else
+                return rows |> List.rev
+        }
+        return! loop []
+    }
+
+    ///Execute a select query asynchronously
+    let execQueryAsync (openConn:NpgsqlConnection) sql ps read = async {
+        //see https://docs.microsoft.com/en-us/archive/blogs/adonet/using-sqldatareaders-new-async-methods-in-net-4-5
+        //for guidance on which async methods to use
+        use cmd = openConn.CreateCommand()
+        cmd.CommandText <- sql
+        for p in ps do
+            cmd.Parameters.Add(p) |> ignore
+        use! reader = cmd.ExecuteReaderAsync() |> Async.AwaitTask
+        return! readRowsAsync reader read
+    }
+
+    ///Execute a select query, returning None if no results
     let execQueryOption (openConn:NpgsqlConnection) sql ps read =
         use cmd = openConn.CreateCommand()
         cmd.CommandText <- sql
@@ -145,6 +171,20 @@ module PostgresAdo =
         then Some([ while reader.Read() do yield read reader ])
         else None
 
+    ///Execute a select query asynchronously, returning None if no results
+    let execQueryOptionAsync (openConn:NpgsqlConnection) sql ps read = async {
+        use cmd = openConn.CreateCommand()
+        cmd.CommandText <- sql
+        for p in ps do
+            cmd.Parameters.Add(p) |> ignore
+        use reader = cmd.ExecuteReader()
+        let! rows = readRowsAsync reader read
+        return
+            match rows with
+            | [] -> None
+            | _ -> Some rows
+    }
+
     ///Execute an insert or update statement and return the number of rows affected
     let execNonQuery (openConn:NpgsqlConnection) sql ps =
         use cmd = openConn.CreateCommand()
@@ -152,6 +192,15 @@ module PostgresAdo =
         for p in ps do
             cmd.Parameters.Add(p) |> ignore
         cmd.ExecuteNonQuery()
+
+    ///Execute an insert or update statement and return the number of rows affected asynchronsouly
+    let execNonQueryAsync (openConn:NpgsqlConnection) sql ps = async {
+        use cmd = openConn.CreateCommand()
+        cmd.CommandText <- sql
+        for p in ps do
+            cmd.Parameters.Add(p) |> ignore
+        return! cmd.ExecuteNonQueryAsync() |> Async.AwaitTask
+    }
 
     ///Execute query returning first column from first row of result set
     let execScalar (openConn:NpgsqlConnection) sql ps =
@@ -161,7 +210,17 @@ module PostgresAdo =
             cmd.Parameters.Add(p) |> ignore
         cmd.ExecuteScalar()
 
+    ///Execute query asynchronously returning first column from first row of result set
+    let execScalarAsync (openConn:NpgsqlConnection) sql ps = async {
+        use cmd = openConn.CreateCommand()
+        cmd.CommandText <- sql
+        for p in ps do
+            cmd.Parameters.Add(p) |> ignore
+        return! cmd.ExecuteScalarAsync() |> Async.AwaitTask
+    }
+
     ///Execute query returning first column from first row of result set
+    ///Returns None if the result is null or DBNull.
     let execScalarOption (openConn:NpgsqlConnection) sql ps =
         use cmd = openConn.CreateCommand()
         cmd.CommandText <- sql
@@ -171,6 +230,20 @@ module PostgresAdo =
         if result = null || result.GetType() = typeof<DBNull>
         then None
         else Some(result)
+
+    ///Execute query asynchronously returning first column from first row of result set.
+    ///Returns None if the result is null or DBNull.
+    let execScalarOptionAsync (openConn:NpgsqlConnection) sql ps = async {
+        use cmd = openConn.CreateCommand()
+        cmd.CommandText <- sql
+        for p in ps do
+            cmd.Parameters.Add(p) |> ignore
+        let! result = cmd.ExecuteScalarAsync() |> Async.AwaitTask
+        return
+            if result = null || result.GetType() = typeof<DBNull>
+            then None
+            else Some(result)
+    }
 
     let read1<'a> (reader:NpgsqlDataReader) =
         reader.GetFieldValue<'a>(0)
@@ -214,8 +287,15 @@ module PostgresAdo =
         reader.GetFieldValue<'f>(5),
         reader.GetFieldValue<'g>(6)
 
-    ///Execute the given function with an open connection which is disposed after completion
+    ///Execute the given function with an opened connection which is disposed after completion
     let doWithOpenConn (getConn:unit -> NpgsqlConnection) f =
         use conn = getConn ()
         conn.Open()
         f conn
+
+    ///Execute the given function with an asynchronously opened connection which is disposed after completion
+    let doWithOpenConnAsync (getConn:unit -> NpgsqlConnection) f = async {
+        use conn = getConn ()
+        do! conn.OpenAsync() |> Async.AwaitTask
+        return! f conn
+    }
