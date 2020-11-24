@@ -98,6 +98,6 @@ module Auto =
             let! res = workflow
             return! f res }
 
-        ///Start an F# Async<unit> as a C#-compatible Task which is be run by NUnit as a test method.
+        ///Start an F# Async<unit> as a C#-compatible Task which can be run by NUnit as a test method.
         let StartAsyncUnitAsTask (x: Async<unit>) : Task =
             upcast(x |> Async.StartAsTask)
