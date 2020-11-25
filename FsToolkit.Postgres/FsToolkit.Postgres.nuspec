@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>FsToolkit.Postgres</id>
-    <version>5.2.$build_number$</version>
+    <version>6.0.$build_number$</version>
     <description>Postgres helpers, mostly built on top of Npgsql</description>
     <authors>Impefect Foods</authors>
     <license type="expression">MIT</license>

@@ -1,12 +1,13 @@
 ﻿namespace FsToolkit.Postgres
 open System
+open System.Data.Common
 open Npgsql
 open NpgsqlTypes
 
 [<AutoOpen>]
 module PostgresAdo =
     module Dynamic =
-        let readOption (r : NpgsqlDataReader) (n : string) : 't option =
+        let readOption (r : DbDataReader) (n : string) : 't option =
             let ordinal = r.GetOrdinal(n)
             if r.IsDBNull(ordinal) then
                 None
@@ -17,18 +18,18 @@ module PostgresAdo =
                 else
                     Some(value)
 
-        let readObj (r : NpgsqlDataReader) (n : string) : 't =
+        let readObj (r : DbDataReader) (n : string) : 't =
             let ordinal = r.GetOrdinal(n)
             if r.IsDBNull(ordinal) then
                 null : 't
             else
                 r.GetFieldValue<'t>(ordinal)
 
-        let readValue (r : NpgsqlDataReader) (n : string) : 't =
+        let readValue (r : DbDataReader) (n : string) : 't =
             let ordinal = r.GetOrdinal(n)
             r.GetFieldValue<'t>(ordinal)
 
-        let readDynamic (r : NpgsqlDataReader) (n : string) : 't =
+        let readDynamic (r : DbDataReader) (n : string) : 't =
             let tty = typeof<'t>
             if tty = typeof<string> then
                 (readObj r n : string) :> obj :?> 't
@@ -63,11 +64,11 @@ module PostgresAdo =
             elif tty = typeof<DateTimeOffset option> then
                 (readOption r n : DateTimeOffset option) :> obj :?> 't
             else
-                failwithf "Unexpected type encountered when reading NpgsqlDataReader value: %A" tty
+                failwithf "Unexpected type encountered when reading DbDataReader value: %A" tty
 
-        ///Dynamically read column value by name from an NpgsqlDataReader converting the value
+        ///Dynamically read column value by name from an DbDataReader converting the value
         ///from the NpgsqlDbType to the generic argument type. Handles nulls and option types intuitively.
-        let inline (?) (r : NpgsqlDataReader) (n : string) : 't =
+        let inline (?) (r : DbDataReader) (n : string) : 't =
             readDynamic r n
 
     ///Build a query param
@@ -134,7 +135,32 @@ module PostgresAdo =
         use reader = cmd.ExecuteReader()
         [ while reader.Read() do yield read reader ]
 
-    ///Execute a select query
+
+    ///read rows from an open data reader to completion
+    let private readRowsAsync (reader: DbDataReader) read = async {
+        let rec loop rows = async {
+            let! hasRow = reader.ReadAsync() |> Async.AwaitTask
+            if hasRow then
+                return! loop ((read reader)::rows)
+            else
+                return rows |> List.rev
+        }
+        return! loop []
+    }
+
+    ///Execute a select query asynchronously
+    let execQueryAsync (openConn:NpgsqlConnection) sql ps read = async {
+        //see https://docs.microsoft.com/en-us/archive/blogs/adonet/using-sqldatareaders-new-async-methods-in-net-4-5
+        //for guidance on which async methods to use
+        use cmd = openConn.CreateCommand()
+        cmd.CommandText <- sql
+        for p in ps do
+            cmd.Parameters.Add(p) |> ignore
+        use! reader = cmd.ExecuteReaderAsync() |> Async.AwaitTask
+        return! readRowsAsync reader read
+    }
+
+    ///Execute a select query, returning None if no results
     let execQueryOption (openConn:NpgsqlConnection) sql ps read =
         use cmd = openConn.CreateCommand()
         cmd.CommandText <- sql
@@ -145,6 +171,20 @@ module PostgresAdo =
         then Some([ while reader.Read() do yield read reader ])
         else None
 
+    ///Execute a select query asynchronously, returning None if no results
+    let execQueryOptionAsync (openConn:NpgsqlConnection) sql ps read = async {
+        use cmd = openConn.CreateCommand()
+        cmd.CommandText <- sql
+        for p in ps do
+            cmd.Parameters.Add(p) |> ignore
+        use! reader = cmd.ExecuteReaderAsync() |> Async.AwaitTask
+        let! rows = readRowsAsync reader read
+        return
+            match rows with
+            | [] -> None
+            | _ -> Some rows
+    }
+
     ///Execute an insert or update statement and return the number of rows affected
     let execNonQuery (openConn:NpgsqlConnection) sql ps =
         use cmd = openConn.CreateCommand()
@@ -152,6 +192,15 @@ module PostgresAdo =
         for p in ps do
             cmd.Parameters.Add(p) |> ignore
         cmd.ExecuteNonQuery()
+
+    ///Execute an insert or update statement and return the number of rows affected asynchronsouly
+    let execNonQueryAsync (openConn:NpgsqlConnection) sql ps = async {
+        use cmd = openConn.CreateCommand()
+        cmd.CommandText <- sql
+        for p in ps do
+            cmd.Parameters.Add(p) |> ignore
+        return! cmd.ExecuteNonQueryAsync() |> Async.AwaitTask
+    }
 
     ///Execute query returning first column from first row of result set
     let execScalar (openConn:NpgsqlConnection) sql ps =
@@ -161,7 +210,17 @@ module PostgresAdo =
             cmd.Parameters.Add(p) |> ignore
         cmd.ExecuteScalar()
 
+    ///Execute query asynchronously returning first column from first row of result set
+    let execScalarAsync (openConn:NpgsqlConnection) sql ps = async {
+        use cmd = openConn.CreateCommand()
+        cmd.CommandText <- sql
+        for p in ps do
+            cmd.Parameters.Add(p) |> ignore
+        return! cmd.ExecuteScalarAsync() |> Async.AwaitTask
+    }
+
     ///Execute query returning first column from first row of result set
+    ///Returns None if the result is null or DBNull.
     let execScalarOption (openConn:NpgsqlConnection) sql ps =
         use cmd = openConn.CreateCommand()
         cmd.CommandText <- sql
@@ -172,32 +231,46 @@ module PostgresAdo =
         then None
         else Some(result)
 
-    let read1<'a> (reader:NpgsqlDataReader) =
+    ///Execute query asynchronously returning first column from first row of result set.
+    ///Returns None if the result is null or DBNull.
+    let execScalarOptionAsync (openConn:NpgsqlConnection) sql ps = async {
+        use cmd = openConn.CreateCommand()
+        cmd.CommandText <- sql
+        for p in ps do
+            cmd.Parameters.Add(p) |> ignore
+        let! result = cmd.ExecuteScalarAsync() |> Async.AwaitTask
+        return
+            if result = null || result.GetType() = typeof<DBNull>
+            then None
+            else Some(result)
+    }
+
+    let read1<'a> (reader:DbDataReader) =
         reader.GetFieldValue<'a>(0)
 
-    let read2<'a,'b> (reader:NpgsqlDataReader) =
+    let read2<'a,'b> (reader:DbDataReader) =
         reader.GetFieldValue<'a>(0),
         reader.GetFieldValue<'b>(1)
 
-    let read3<'a,'b,'c> (reader:NpgsqlDataReader) =
+    let read3<'a,'b,'c> (reader:DbDataReader) =
         reader.GetFieldValue<'a>(0),
         reader.GetFieldValue<'b>(1),
         reader.GetFieldValue<'c>(2)
 
-    let read4<'a,'b,'c,'d> (reader:NpgsqlDataReader) =
+    let read4<'a,'b,'c,'d> (reader:DbDataReader) =
         reader.GetFieldValue<'a>(0),
         reader.GetFieldValue<'b>(1),
         reader.GetFieldValue<'c>(2),
         reader.GetFieldValue<'d>(3)
 
-    let read5<'a,'b,'c,'d,'e> (reader:NpgsqlDataReader) =
+    let read5<'a,'b,'c,'d,'e> (reader:DbDataReader) =
         reader.GetFieldValue<'a>(0),
         reader.GetFieldValue<'b>(1),
         reader.GetFieldValue<'c>(2),
         reader.GetFieldValue<'d>(3),
         reader.GetFieldValue<'e>(4)
 
-    let read6<'a,'b,'c,'d,'e,'f> (reader:NpgsqlDataReader) =
+    let read6<'a,'b,'c,'d,'e,'f> (reader:DbDataReader) =
         reader.GetFieldValue<'a>(0),
         reader.GetFieldValue<'b>(1),
         reader.GetFieldValue<'c>(2),
@@ -205,7 +278,7 @@ module PostgresAdo =
         reader.GetFieldValue<'e>(4),
         reader.GetFieldValue<'f>(5)
 
-    let read7<'a,'b,'c,'d,'e,'f,'g> (reader:NpgsqlDataReader) =
+    let read7<'a,'b,'c,'d,'e,'f,'g> (reader:DbDataReader) =
         reader.GetFieldValue<'a>(0),
         reader.GetFieldValue<'b>(1),
         reader.GetFieldValue<'c>(2),
@@ -214,8 +287,17 @@ module PostgresAdo =
         reader.GetFieldValue<'f>(5),
         reader.GetFieldValue<'g>(6)
 
-    ///Execute the given function with an open connection which is disposed after completion
+    ///Execute the given function with an opened connection which is disposed after completion
     let doWithOpenConn (getConn:unit -> NpgsqlConnection) f =
         use conn = getConn ()
         conn.Open()
         f conn
+
+    ///Execute the given function with an asynchronously opened connection which is disposed after completion
+    let doWithOpenConnAsync (getConn:unit -> NpgsqlConnection) f = async {
+        let conn = getConn ()
+        do! conn.OpenAsync() |> Async.AwaitTask
+        let! result = f conn
+        do! conn.CloseAsync() |> Async.AwaitTask
+        return result
+    }
