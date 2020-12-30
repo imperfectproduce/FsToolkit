@@ -16,7 +16,7 @@ jobs:
       - checkout
       - run:
           name: Pack
-          command: sudo apt install nuget && dotnet build --configuration Release && nuget pack "FsToolkit.Json/FsToolkit.Json.nuspec" -properties build_number=$CIRCLE_BUILD_NUM
+          command: apt install nuget && dotnet build --configuration Release && nuget pack "FsToolkit.Json/FsToolkit.Json.nuspec" -properties build_number=$CIRCLE_BUILD_NU
 
 workflows:
   test_pack_push:
@@ -24,4 +24,4 @@ workflows:
       - test
       - pack:
               requires:
-                      - test
+                      #   - test
