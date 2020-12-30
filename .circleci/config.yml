@@ -19,12 +19,12 @@ jobs:
           command: dotnet tool restore && dotnet build --configuration Release
       - run:
           name: Pack
-          command: dotnet pack -c "FsToolkit.Json/FsToolkit.Json.nuspec" -p:build_number=$CIRCLE_BUILD_NUM
+          command: dotnet pack -p:NuspecFile="FsToolkit.Json/FsToolkit.Json.nuspec" -p:build_number=$CIRCLE_BUILD_NUM
 
 workflows:
   test_pack_push:
     jobs:
-      - test
+            #- test
       - pack:
               requires:
-                      - test
+                      #- test
