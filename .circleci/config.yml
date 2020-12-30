@@ -25,6 +25,6 @@ workflows:
   test_pack_push:
     jobs:
             #- test
-      - pack:
-              requires:
+      - pack #:
+              #requires:
                       #- test
