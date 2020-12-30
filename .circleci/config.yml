@@ -15,14 +15,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install Nuget
-          command: wget https://packages.microsoft.com/config/ubuntu/20.10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && dpkg -i packages-microsoft-prod.deb && apt install nuget
-      - run:
           name: Build
           command: dotnet build --configuration Release
       - run:
           name: Pack
-          command: nuget pack "FsToolkit.Json/FsToolkit.Json.nuspec" -properties build_number=$CIRCLE_BUILD_NU
+          command: dotnet pack -c "FsToolkit.Json/FsToolkit.Json.nuspec" -p:build_number=$CIRCLE_BUILD_NU
 
 workflows:
   test_pack_push:
