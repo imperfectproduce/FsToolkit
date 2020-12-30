@@ -1,0 +1,25 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: mcr.microsoft.com/dotnet/sdk:5.0.100-buster-slim
+    steps:
+      - checkout
+      - run:
+          name: Build
+          command: dotnet build
+  test:
+    docker:
+      - image: mcr.microsoft.com/dotnet/sdk:5.0.100-buster-slim
+    steps:
+      - checkout
+      - run:
+          name: Test
+          command: dotnet test
+
+workflows:
+  build_test_deploy:
+    jobs:
+      - build
+      - test
