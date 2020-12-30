@@ -9,8 +9,19 @@ jobs:
       - run:
           name: Test
           command: dotnet tool restore && dotnet test
+  pack:
+    docker:
+      - image: mcr.microsoft.com/dotnet/core/sdk:3.1
+    steps:
+      - checkout
+      - run:
+          name: Pack
+          command: nuget pack "FsToolkit.Json/FsToolkit.Json.nuspec" -properties build_number=$(CIRCLE_BUILD_NUM)
 
 workflows:
   test_pack_push:
     jobs:
       - test
+      - pack:
+              requires:
+                      - test
