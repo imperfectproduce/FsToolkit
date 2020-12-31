@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>FsToolkit.Json</id>
+    <id>Imperfect.FsToolkit.Json</id>
     <version>5.1.143</version>
     <description>Json helpers, mostly built on top of Newtonsoft.Json</description>
     <authors>Imperfect Foods</authors>
