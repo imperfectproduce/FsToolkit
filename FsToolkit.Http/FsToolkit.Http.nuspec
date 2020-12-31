@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>FsToolkit.Http</id>
-    <version>5.1.$build_number$</version>
+    <version>5.1.143</version>
     <description>Http helpers, mostly built on top of HttpClient</description>
     <authors>Imperfect Foods</authors>
     <license type="expression">MIT</license>
@@ -14,6 +14,6 @@
 	</dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\netstandard2.0\FsToolkit.Http.dll" target="lib\netstandard2.0" /> 
+    <file src="bin\Release\netstandard2.0\FsToolkit.Http.dll" target="lib\netstandard2.0" />
   </files>
 </package>

@@ -3,12 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.271
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{63391FEF-35D9-4170-ABEA-23573849A0E8}"
-	ProjectSection(SolutionItems) = preProject
-		paket.dependencies = paket.dependencies
-		paket.lock = paket.lock
-	EndProjectSection
-EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FsToolkit", "FsToolkit\FsToolkit.fsproj", "{9FD69053-90C4-42D6-BF27-9F282EE3F50A}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FsToolkit.Json", "FsToolkit.Json\FsToolkit.Json.fsproj", "{A286533A-0CD8-4C3E-82B2-2EAD823A8D76}"

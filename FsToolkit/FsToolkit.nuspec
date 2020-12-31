@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>FsToolkit</id>
-    <version>5.2.$build_number$</version>
+    <version>5.2.143</version>
     <description>Basic helpers with no dependencies</description>
     <authors>Imperfect Foods</authors>
     <license type="expression">MIT</license>

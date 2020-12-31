@@ -2,13 +2,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <NuspecFile>FsToolkit.Postgres.nuspec</NuspecFile>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" Version="4.7.2" />
+    <PackageReference Include="Npgsql" Version="4.1.5" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="PostgresAdo.fs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FsToolkit.Postgres.nuspec" />
-    <None Include="paket.references" />
   </ItemGroup>
-  <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

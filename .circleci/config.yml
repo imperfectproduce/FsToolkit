@@ -3,20 +3,20 @@ version: 2.1
 jobs:
   test:
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:3.1
+      - image: mcr.microsoft.com/dotnet/sdk:5.0.100-buster-slim
     steps:
       - checkout
       - run:
           name: Test
-          command: dotnet tool restore && dotnet test
+          command: dotnet test
   pack:
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:3.1
+      - image: mcr.microsoft.com/dotnet/sdk:5.0.100-buster-slim
     steps:
       - checkout
-        #- run:
-        #    name: Build
-        #    command: dotnet tool restore && dotnet build -c Release
+      - run:
+          name: Pack
+          command: dotnet pack -c Release
 
 workflows:
   test_pack_push:

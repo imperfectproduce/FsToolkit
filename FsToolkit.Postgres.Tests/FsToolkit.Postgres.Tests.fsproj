@@ -1,26 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
-
-        <IsPackable>false</IsPackable>
-        <GenerateProgramFile>false</GenerateProgramFile>
+      <TargetFramework>net5.0</TargetFramework>
+      <IsPackable>false</IsPackable>
+      <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="FSharp.Core" Version="5.0.0" />
         <PackageReference Include="nunit" Version="3.12.0" />
+        <PackageReference Include="NUnit3TestAdapter" Version="3.17" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />
+        <PackageReference Include="Unquote" Version="5.0.0" />
     </ItemGroup>
 
     <ItemGroup>
       <Compile Include="PostgresAdoTests.fs" />
-      <None Include="paket.references" />
     </ItemGroup>
     
     <ItemGroup>
         <ProjectReference Include="..\FsToolkit.Postgres\FsToolkit.Postgres.fsproj" />
         <ProjectReference Include="..\FsToolkit\FsToolkit.fsproj" />
     </ItemGroup>
-    <Import Project="..\.paket\Paket.Restore.targets" />
 
 </Project>
