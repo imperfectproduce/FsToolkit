@@ -16,10 +16,10 @@ jobs:
       - checkout
       - run:
           name: Build
-          command: dotnet tool restore && dotnet build --configuration Release
+          command: dotnet tool restore && dotnet build -c Release
       - run:
-          name: Pack
-          command: dotnet pack -p:NuspecFile="FsToolkit.Json.nuspec" -p:NuspecBasePath="FsToolkit.Json" -p:build_number=$CIRCLE_BUILD_NUM
+          name: Install mono
+          command: apt install mono
 
 workflows:
   test_pack_push:
