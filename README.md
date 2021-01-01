@@ -1,16 +1,18 @@
 # FsToolkit
-FSharp Toolkit - helpful packages for everyday F# programming
+Helpful packages for everyday F# programming
 
-All packages target `netstandard2.0`. There is one `.nuspec` file per project in the solution (each project is a package).
+All packages target `netstandard2.0`. There is one `.nuspec` file per project in the solution (each non-test project is a package).
 
-Packages are automatically published to AppVeyor project feeds with version pattern _&lt;major>.&lt;minor>.&lt;ci build number>_ via a CI post-build script like
+Packages are automatically published to nuget.org via circleci build workflow. There are some differences to how we publish packages to nuget.org with circleci compared to how we published packages to our private AppVeyor:
+* we no longer auto-increment the package version patch number in our coninuous integration builds. Package version numbers must be manuallu set in `.nuspec` files.
+* all branches are published, allowing publish of alpha-versioned packages from feature branches if desired. But the `--skip-duplicate` flag is used in the `dotnet nuget push` command so packages only published when package version numbers are updated in the `.nuspec` file.
+* all packages use `Imperfect.` id-suffix like `Imperfect.FsToolkit.Json` instead of `FsToolkit.Json`. This is to differentiate our packages from existing `FsToolkit`-suffixed packages in nuget.org 
+* since we are publishing to the central nuget.org repository, we no longer need a custom source in `NuGet.Config` files for these packages.
 
-    nuget pack "FsToolkit.Json\FsToolkit.Json.nuspec" -properties build_number=$Env:APPVEYOR_BUILD_NUMBER
-    Get-ChildItem .\*.nupkg | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-
-Major and Minor numbers should be manually incremented in `.nuspec` files by developers as appropriate.
-
-Packages are all published to Imperfect's private account feed https://ci.appveyor.com/nuget/relayfoods
+Recommended workflow for publishing new package versions:
+* create a PR and once approved merge to master
+* make a direct commit to master to increment package version number(s) in appropriate `.nuspec` file(s)
+* the circleci job will automatically publish the new package version(s)
 
 ## Project-specific Readme's
 
