@@ -9,7 +9,7 @@ jobs:
       - run:
           name: Test
           command: dotnet test
-  pack:
+  pack_and_push:
     docker:
       - image: mcr.microsoft.com/dotnet/core/sdk:3.1
     steps:
@@ -17,11 +17,23 @@ jobs:
       - run:
           name: Pack
           command: dotnet pack -c Release
+      - run:
+          name: Push FsToolkit
+          command: dotnet nuget push FsToolkit/bin/Release/*.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_API_KEY --skip-duplicate
+      - run:
+          name: Push FsToolkit.Json
+          command: dotnet nuget push FsToolkit.Json/bin/Release/*.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_API_KEY --skip-duplicate
+      - run:
+          name: Push FsToolkit.Http
+          command: dotnet nuget push FsToolkit.Http/bin/Release/*.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_API_KEY --skip-duplicate
+      - run:
+          name: Push FsToolkit.Postgres
+          command: dotnet nuget push FsToolkit.Postgres/bin/Release/*.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_API_KEY --skip-duplicate
 
 workflows:
   test_pack_push:
     jobs:
       - test
-      - pack :
+      - pack_and_push:
           requires:
             - test
