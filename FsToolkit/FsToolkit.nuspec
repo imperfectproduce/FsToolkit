@@ -3,7 +3,7 @@
   <metadata>
     <id>Imperfect.FsToolkit</id>
     <version>5.2.143</version>
-    <description>Basic helpers with no dependencies</description>
+    <description>Basic helpers</description>
     <authors>Imperfect Foods</authors>
     <license type="expression">MIT</license>
     <projectUrl>https://github.com/imperfectproduce/FsToolkit</projectUrl>
