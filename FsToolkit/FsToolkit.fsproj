@@ -2,7 +2,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <NuspecFile>FsToolkit.nuspec</NuspecFile>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" Version="4.7.2" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="Auto.fs" />
     <Compile Include="Config.fs" />
@@ -10,7 +17,5 @@
     <Compile Include="ResizeArray.fs" />
     <Compile Include="Result.fs" />
     <None Include="FsToolkit.nuspec" />
-    <None Include="paket.references" />
   </ItemGroup>
-  <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
