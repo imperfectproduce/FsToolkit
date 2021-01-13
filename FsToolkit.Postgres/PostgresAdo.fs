@@ -295,7 +295,7 @@ module PostgresAdo =
 
     ///Execute the given function with an asynchronously opened connection which is disposed after completion
     let doWithOpenConnAsync (getConn:unit -> NpgsqlConnection) f = async {
-        let conn = getConn ()
+        use conn = getConn ()
         do! conn.OpenAsync() |> Async.AwaitTask
         let! result = f conn
         do! conn.CloseAsync() |> Async.AwaitTask
