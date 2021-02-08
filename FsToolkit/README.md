@@ -8,7 +8,7 @@ This module implements patterns for reading config values from various sources i
 
 Here is the precedence from which settings are read:
 
-1. environment various
+1. environment variables
 2. traditional `App.config`
 3. `app.ini.local` (intended for non-versioned local overrides)  
 4. `app.ini`
