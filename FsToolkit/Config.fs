@@ -4,7 +4,7 @@ open System
 open System.Configuration
 
 module Config =
-    
+
     let private getAppSetting (name: string) =
         match ConfigurationManager.AppSettings.[name] with
         | null ->
@@ -34,32 +34,33 @@ module Config =
             |> Seq.tryHead
         with :? IO.FileNotFoundException -> None
 
-    ///Get config setting, looking in app settings, environment variables, and 'secrets.ini' in that order.
-    ///Fails hard if not found.
+    ///Try-Get config setting, looking in app settings, environment variables, 'app.ini.local', and 'app.ini' in that order.
     let private tryGetSettingDynamic (name: string) =
         let name = name.Trim()
-        let cs = 
+        let cs =
             [getEnvironmentVariable
              getAppSetting
+             getIniSetting AppDomain.CurrentDomain.BaseDirectory "app.ini.local"
+             getIniSetting Environment.CurrentDirectory "app.ini.local"
              getIniSetting AppDomain.CurrentDomain.BaseDirectory "app.ini"
-             getIniSetting Environment.CurrentDirectory "app.ini"
-             getIniSetting AppDomain.CurrentDomain.BaseDirectory "secrets.ini"
-             getIniSetting Environment.CurrentDirectory "secrets.ini"]
+             getIniSetting Environment.CurrentDirectory "app.ini"]
             |> Seq.tryPick (fun getter -> getter(name))
         cs
 
-    ///Get config setting, looking in app settings, environment variables, and 'secrets.ini' in that order.
-    ///Fails hard if not found. Look-up is memoized
+    ///Try-Get config setting, looking in app settings, environment variables, 'app.ini.local', and 'app.ini' in that order.
+    ///Look-up is memoized
     let tryGetSetting = memoize tryGetSettingDynamic
 
-    ///Get config setting, looking in app settings, environment variables, and 'secrets.ini' in that order.
-    let getSettingOrDefault name fallback = 
+    ///Get config setting, looking in app settings, environment variables, 'app.ini.local', and 'app.ini' in that order.
+    ///Look-up is memoized. Default ("fallback") is used if not found.
+    let getSettingOrDefault name fallback =
         match tryGetSetting name with
         | Some cs -> cs
         | None -> fallback
 
-    ///Get config setting, looking in app settings, environment variables, and 'secrets.ini' in that order.
-    let getSetting name = 
+    ///Get config setting, looking in app settings, environment variables, 'app.ini.local', and 'app.ini' in that order.
+    ///Look-up is memoized. Fails hard if not found.
+    let getSetting name =
         match tryGetSetting name with
         | Some cs -> cs
         | None -> failwithf "Config setting '%s' not found" name

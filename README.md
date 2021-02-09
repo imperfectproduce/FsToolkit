@@ -1,7 +1,7 @@
 # FsToolkit
 Helpful packages for everyday F# programming
 
-All packages target `netstandard2.0`. There is one `.nuspec` file per project in the solution (each non-test project is a package).
+All packages target `netstandard2.0`. There is one `.nuspec` file per non-test project in the solution (each non-test project is a package).
 
 Packages are automatically published to nuget.org via circleci build workflow. There are some differences to how we publish packages to nuget.org with circleci compared to how we published packages to our private AppVeyor:
 * we no longer auto-increment the package version patch number in our coninuous integration builds. Package version numbers must be manually set in `.nuspec` files.
