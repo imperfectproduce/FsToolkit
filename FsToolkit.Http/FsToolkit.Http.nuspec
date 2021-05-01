@@ -8,8 +8,8 @@
     <license type="expression">MIT</license>
 	<projectUrl>https://github.com/imperfectproduce/FsToolkit</projectUrl>
 	<dependencies>
-      <group targetFramework="netstandard2.0">
-		<dependency id="FSharp.Core" version="4.7.2" />
+      <group targetFramework="net5.0">
+		<dependency id="FSharp.Core" version="5.0.0" />
       </group>
 	</dependencies>
   </metadata>
