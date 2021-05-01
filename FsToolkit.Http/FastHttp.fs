@@ -103,29 +103,16 @@ module ResponsePatterns =
 ///Perform HTTP operations optimized for speed and ergonomics
 module FastHttp =
 
-    ///Apply global (ServicePointManager) optimizations: call this once at application startup.
-    let optimize () =
-        //don't limit number of http connections
-        System.Net.ServicePointManager.DefaultConnectionLimit <- Int32.MaxValue
-        //speeds up PUT and POST requests
-        System.Net.ServicePointManager.Expect100Continue <- false
-
-    ///Handler used by the HttpClient singleton
+    ///Handler singleton used by HttpClient instances
     let handler =
-        let handler = new HttpClientHandler()
+        let handler = new SocketsHttpHandler()
         handler.AllowAutoRedirect <- false
         handler.UseCookies <- false
-        handler.UseDefaultCredentials <- true
         handler.AutomaticDecompression <- DecompressionMethods.GZip ||| DecompressionMethods.Deflate
+        handler.PooledConnectionLifetime <- TimeSpan.FromMinutes(2.) //default is infinite
+        handler.PooledConnectionIdleTimeout <- TimeSpan.FromMinutes(2.) //default is also 2
+        handler.MaxConnectionsPerServer <- Int32.MaxValue //default is also infinite
         handler
-
-    //HttpClient used for all requests (taking advantage singleton built-in socket pooling)
-    let client =
-        let client = new HttpClient(handler)
-        //speeds up PUT and POST requests
-        client.DefaultRequestHeaders.ExpectContinue <- Nullable(false)
-        client.Timeout <- TimeSpan.FromDays(1.) // FastRequest.Timeout should be used instead
-        client
 
     let private utf8Encoding includeBom = UTF8Encoding(includeBom) :> Encoding
     open System.Text.RegularExpressions
@@ -215,6 +202,11 @@ module FastHttp =
         use request = mkHttpRequestMessage fastRequest
         let ct = mkCancellationToken fastRequest
 
+        use client = new HttpClient(handler, disposeHandler=false)
+        //speeds up PUT and POST requests
+        client.DefaultRequestHeaders.ExpectContinue <- Nullable(false)
+        client.Timeout <- TimeSpan.FromDays(1.) // FastRequest.Timeout should be used instead
+
         let sw = Diagnostics.Stopwatch()
         sw.Start()
         use! response = client.SendAsync(request, ct) |> Async.AwaitTask
@@ -236,6 +228,11 @@ module FastHttp =
     let send fastRequest =
         use request = mkHttpRequestMessage fastRequest
         let ct = mkCancellationToken fastRequest
+
+        use client = new HttpClient(handler, disposeHandler=false)
+        //speeds up PUT and POST requests
+        client.DefaultRequestHeaders.ExpectContinue <- Nullable(false)
+        client.Timeout <- TimeSpan.FromDays(1.) // FastRequest.Timeout should be used instead
 
         let sw = Diagnostics.Stopwatch()
         sw.Start()
