@@ -2,18 +2,18 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Imperfect.FsToolkit.Http</id>
-    <version>5.1.143</version>
+    <version>6.0.0-rc.2</version>
     <description>Http helpers, mostly built on top of HttpClient</description>
     <authors>Imperfect Foods</authors>
     <license type="expression">MIT</license>
 	<projectUrl>https://github.com/imperfectproduce/FsToolkit</projectUrl>
 	<dependencies>
-      <group targetFramework="netstandard2.0">
-		<dependency id="FSharp.Core" version="4.7.2" />
+      <group targetFramework="net5.0">
+		<dependency id="FSharp.Core" version="5.0.0" />
       </group>
 	</dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\netstandard2.0\FsToolkit.Http.dll" target="lib\netstandard2.0" />
+    <file src="bin\Release\net5.0\FsToolkit.Http.dll" target="lib\net5.0" />
   </files>
 </package>

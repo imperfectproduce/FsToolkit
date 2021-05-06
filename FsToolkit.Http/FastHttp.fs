@@ -1,6 +1,7 @@
 ﻿namespace FsToolkit.Http
 
 open System
+open System.IO
 open System.Net
 open System.Net.Http
 open System.Net.Http.Headers
@@ -32,15 +33,15 @@ type FastRequest = {
     Ensure2xx : bool
     ///Indicates whether query param keys and values should be escaped
     EscapeQueryParams : bool
-} with 
+} with
     ///Default fast request: GET | http://example.com | JSON | no body | timeout = 60s | Ensure2xx false | EscapeQueryParams true
     static member Default = {
-        Method = "GET" 
+        Method = "GET"
         Url = "http://example.org"
         QueryParams = []
-        Headers = 
-            [ ("content-type", "application/json; charset=utf-8") 
-              ("accept", "application/json, text/html, text/plain, application/xml, application/xhtml+xml") 
+        Headers =
+            [ ("content-type", "application/json; charset=utf-8")
+              ("accept", "application/json, text/html, text/plain, application/xml, application/xhtml+xml")
               ("Accept-Encoding", "gzip, deflate") ]
         Body = null
         Timeout = TimeSpan.FromSeconds(60.)
@@ -84,7 +85,7 @@ module ResponsePatterns =
 
     ///Match succeeds if response status code is in the 200-range
     let (|Status2xx|_|) (response:FastResponse) =
-        if response.Is2xx 
+        if response.Is2xx
         then Some response
         else None
 
@@ -102,33 +103,20 @@ module ResponsePatterns =
 ///Perform HTTP operations optimized for speed and ergonomics
 module FastHttp =
 
-    ///Apply global (ServicePointManager) optimizations: call this once at application startup.
-    let optimize () =
-        //don't limit number of http connections
-        System.Net.ServicePointManager.DefaultConnectionLimit <- Int32.MaxValue
-        //speeds up PUT and POST requests
-        System.Net.ServicePointManager.Expect100Continue <- false
-
-    ///Handler used by the HttpClient singleton
-    let handler = 
-        let handler = new HttpClientHandler()
+    ///Handler singleton used by HttpClient instances
+    let handler =
+        let handler = new SocketsHttpHandler()
         handler.AllowAutoRedirect <- false
         handler.UseCookies <- false
-        handler.UseDefaultCredentials <- true
         handler.AutomaticDecompression <- DecompressionMethods.GZip ||| DecompressionMethods.Deflate
+        handler.PooledConnectionLifetime <- TimeSpan.FromMinutes(2.) //default is infinite
+        handler.PooledConnectionIdleTimeout <- TimeSpan.FromMinutes(2.) //default is also 2
+        handler.MaxConnectionsPerServer <- Int32.MaxValue //default is also infinite
         handler
-
-    //HttpClient used for all requests (taking advantage singleton built-in socket pooling)
-    let client = 
-        let client = new HttpClient(handler)
-        //speeds up PUT and POST requests
-        client.DefaultRequestHeaders.ExpectContinue <- Nullable(false)
-        client.Timeout <- TimeSpan.FromDays(1.) // FastRequest.Timeout should be used instead
-        client
 
     let private utf8Encoding includeBom = UTF8Encoding(includeBom) :> Encoding
     open System.Text.RegularExpressions
-    let private charsetRegex = 
+    let private charsetRegex =
         Regex(@"(?<mime>[^;]*)(;\s*charset=(?<charset>.*))?", RegexOptions.Compiled ||| RegexOptions.CultureInvariant)
 
     let private createRequestContent (fastRequest:FastRequest) =
@@ -150,42 +138,46 @@ module FastHttp =
         | None ->
             new StringContent(fastRequest.Body, utf8Encoding fastRequest.IncludeUtf8Bom, "text/plain")
 
-    ///Send a FastRequest asynchronously and receive a FastResponse
-    let sendAsync fastRequest = async {
-        use request = new HttpRequestMessage()
-        request.RequestUri <- 
-            let builder = UriBuilder(fastRequest.Url)
-            if fastRequest.QueryParams <> [] then
-                let qs = 
-                    fastRequest.QueryParams
-                    |> Seq.map (fun (k,v) -> 
-                        if fastRequest.EscapeQueryParams 
-                        then sprintf "%s=%s" (Uri.EscapeDataString k) (Uri.EscapeDataString v)
-                        else sprintf "%s=%s" k v)
-                builder.Query <- String.Join("&", qs)
-            builder.Uri
+    let private mkHttpRequestMessage fastRequest =
+        let request = new HttpRequestMessage()
+        try
+            request.RequestUri <-
+                let builder = UriBuilder(fastRequest.Url)
+                if fastRequest.QueryParams <> [] then
+                    let qs =
+                        fastRequest.QueryParams
+                        |> Seq.map (fun (k,v) ->
+                            if fastRequest.EscapeQueryParams
+                            then sprintf "%s=%s" (Uri.EscapeDataString k) (Uri.EscapeDataString v)
+                            else sprintf "%s=%s" k v)
+                    builder.Query <- String.Join("&", qs)
+                builder.Uri
 
-        request.Method <- HttpMethod(fastRequest.Method)
-        for (k,v) in fastRequest.Headers do
-            if ["content-type"] |> Seq.contains (k.ToLower()) |> not then
-                request.Headers.TryAddWithoutValidation(k,v) |> ignore
+            request.Method <- HttpMethod(fastRequest.Method)
+            for (k,v) in fastRequest.Headers do
+                if ["content-type"] |> Seq.contains (k.ToLower()) |> not then
+                    request.Headers.TryAddWithoutValidation(k,v) |> ignore
 
-        if fastRequest.Body |> String.IsNullOrEmpty |> not && ["GET";"HEAD"] |> Seq.contains fastRequest.Method |> not
-        then request.Content <- createRequestContent fastRequest
-        else ()
+            if fastRequest.Body |> String.IsNullOrEmpty |> not && ["GET";"HEAD"] |> Seq.contains fastRequest.Method |> not
+            then request.Content <- createRequestContent fastRequest
+            else ()
+            request
+        with _ ->
+            request.Dispose()
+            reraise ()
 
-        let ct = 
-            match fastRequest.CancellationToken with
-            | Some ct -> ct
-            | _ ->
-                let cts = new CancellationTokenSource(fastRequest.Timeout.TotalMilliseconds |> int)
-                cts.Token
+    let private mkCancellationToken fastRequest =
+        match fastRequest.CancellationToken with
+        | Some ct -> ct
+        | _ ->
+            let cts = new CancellationTokenSource(fastRequest.Timeout.TotalMilliseconds |> int)
+            cts.Token
 
-        let sw = Diagnostics.Stopwatch() 
-        sw.Start()
-        use! response = client.SendAsync(request, ct) |> Async.AwaitTask
-        let! responseBody = response.Content.ReadAsStringAsync() |> Async.AwaitTask
-        sw.Stop()
+    let private mkFastResponse fastRequest
+                               (request:HttpRequestMessage)
+                               (response:HttpResponseMessage)
+                               responseBody
+                               (sw:Diagnostics.Stopwatch) =
         let responseHeaders =
             let parseHeaders headers =
                 headers
@@ -203,8 +195,63 @@ module FastHttp =
         if fastRequest.Ensure2xx then
             fastResponse.Ensure2xx()
 
+        fastResponse
+
+    ///Send a FastRequest asynchronously and receive a FastResponse
+    let sendAsync fastRequest = async {
+        use request = mkHttpRequestMessage fastRequest
+        let ct = mkCancellationToken fastRequest
+
+        use client = new HttpClient(handler, disposeHandler=false)
+        //speeds up PUT and POST requests
+        client.DefaultRequestHeaders.ExpectContinue <- Nullable(false)
+        client.Timeout <- TimeSpan.FromDays(1.) // FastRequest.Timeout should be used instead
+
+        let sw = Diagnostics.Stopwatch()
+        sw.Start()
+        use! response = client.SendAsync(request, ct) |> Async.AwaitTask
+        let! responseBody = response.Content.ReadAsStringAsync() |> Async.AwaitTask
+        sw.Stop()
+
+        let fastResponse =
+            mkFastResponse
+                fastRequest
+                request
+                response
+                responseBody
+                sw
+
         return fastResponse
     }
 
     ///Send a FastRequest synchronously and receive a FastResponse
-    let send = sendAsync>>Async.RunSynchronously
+    let send fastRequest =
+        use request = mkHttpRequestMessage fastRequest
+        let ct = mkCancellationToken fastRequest
+
+        use client = new HttpClient(handler, disposeHandler=false)
+        //speeds up PUT and POST requests
+        client.DefaultRequestHeaders.ExpectContinue <- Nullable(false)
+        client.Timeout <- TimeSpan.FromDays(1.) // FastRequest.Timeout should be used instead
+
+        let sw = Diagnostics.Stopwatch()
+        sw.Start()
+        use response = client.Send(request, ct)
+        use responseStream = response.Content.ReadAsStream()
+        let responseBody =
+            if responseStream |> isNull || responseStream.CanRead |> not then
+                null
+            else
+                use sr = new StreamReader(responseStream)
+                sr.ReadToEnd()
+        sw.Stop()
+
+        let fastResponse =
+            mkFastResponse
+                fastRequest
+                request
+                response
+                responseBody
+                sw
+
+        fastResponse
