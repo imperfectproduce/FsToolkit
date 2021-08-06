@@ -42,20 +42,28 @@ module Serialization =
             let p = base.CreateProperty(mi, ms)
             setJsonPropertyIgnore ignoreAttribute p mi
             p
-  
+
     let clientSettings =
         let jsonSettings = JsonSerializerSettings()
-        jsonSettings.Converters.Add(ClientDUJsonConverter()) 
-        jsonSettings.Converters.Add(OptionConverter()) 
-        jsonSettings.Converters.Add(TupleConverter()) 
+        jsonSettings.Converters.Add(ClientDUJsonConverter())
+        jsonSettings.Converters.Add(OptionConverter())
+        jsonSettings.Converters.Add(TupleConverter())
+        jsonSettings.ContractResolver <- ClientContractResolver()
+        jsonSettings
+
+    let oneWayClientSettings =
+        let jsonSettings = JsonSerializerSettings()
+        jsonSettings.Converters.Add(OptionConverter())
+        jsonSettings.Converters.Add(TupleConverter())
+        jsonSettings.Converters.Add(OneWayToJsonDUConverter())
         jsonSettings.ContractResolver <- ClientContractResolver()
         jsonSettings
 
     let storageSettings =
         let jsonSettings = JsonSerializerSettings()
-        jsonSettings.Converters.Add(StorageDUJsonConverter()) 
-        jsonSettings.Converters.Add(OptionConverter()) 
-        jsonSettings.Converters.Add(TupleConverter()) 
+        jsonSettings.Converters.Add(StorageDUJsonConverter())
+        jsonSettings.Converters.Add(OptionConverter())
+        jsonSettings.Converters.Add(TupleConverter())
         jsonSettings.ContractResolver <- StorageContractResolver()
         jsonSettings
 
@@ -66,19 +74,26 @@ module Serialization =
     type JsonTarget =
         ///Optimized for javascript clients
         | Client
+        ///Similar to Client but with some serialization techniques that are destructive to types (DUs).
+        ///Serialization cannot be round tripped. Produces "flatter" json structures. This target cannot
+        ///be used for deserialization
+        | OneWayToClient
         ///Optimized for storage (more flexible)
         | Storage
         ///Optimized for marshalling data (fast, for machines only)
         | Transfer
-    with 
+    with
         member this.Settings =
             match this with
             | Client -> clientSettings
+            | OneWayToClient -> oneWayClientSettings
             | Storage -> storageSettings
             | Transfer -> transferSettings
-  
+
     let inline serialize (target:JsonTarget) data =
         JsonConvert.SerializeObject(data, target.Settings)
-  
+
     let inline deserialize<'t> (target:JsonTarget) (json : string) =
-        JsonConvert.DeserializeObject<'t>(json, target.Settings)
+        match target with
+        | OneWayToClient -> raise (JsonDeserializingNotSupportedException "Reading JSON not supported with this target setting")
+        | _ -> JsonConvert.DeserializeObject<'t>(json, target.Settings)

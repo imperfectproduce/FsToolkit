@@ -8,33 +8,33 @@ open System.ComponentModel
 open System.Reflection
 
 ///Custom converters for "exotic" F# types
-module Converters = 
+module Converters =
     open Prelude
 
     /// Some 3 -> "3"; None -> null
     type OptionConverter() =
         inherit JsonConverter()
 
-        override __.CanConvert(objType) = 
+        override __.CanConvert(objType) =
             isOption objType
 
-        override __.ReadJson(reader, objType, _, serializer) = 
+        override __.ReadJson(reader, objType, _, serializer) =
             //adapted from https://github.com/kolektiv/FifteenBelow.Json/blob/master/src/FifteenBelow.Json/Converters.fs#L150
             let cases = getUnionCases objType
             let args = getGenericArguments objType
- 
+
             let optionOf =
                 match args.[0].IsValueType with
                 | true -> (typedefof<Nullable<_>>).MakeGenericType ([| args.[0] |]) //??
                 | _ -> args.[0]
- 
+
             let jObj = JToken.ReadFrom reader
             let result = jObj.ToObject(optionOf, serializer)
             match result with
             | null -> FSharpValue.MakeUnion (cases.[0], [||])
             | value -> FSharpValue.MakeUnion (cases.[1], [| value |])
 
-        override __.WriteJson(writer, value, serializer) = 
+        override __.WriteJson(writer, value, serializer) =
             let unionType = value.GetType()
             let caseInfo, values = FSharpValue.GetUnionFields(value, unionType)
             if caseInfo.Name = "Some" then
@@ -47,14 +47,14 @@ module Converters =
     type TupleConverter() =
         inherit JsonConverter()
 
-        override __.CanConvert(objType) = 
+        override __.CanConvert(objType) =
             isTuple objType
 
-        override __.ReadJson(reader, objType, existingValue, serializer) = 
+        override __.ReadJson(reader, objType, existingValue, serializer) =
             //adapted from https://github.com/kolektiv/FifteenBelow.Json/blob/master/src/FifteenBelow.Json/Converters.fs#L150
             let types = getTupleElements objType
 
-            let jtokens = 
+            let jtokens =
                 [|
                     reader.Read() |> ignore
                     while reader.TokenType <> JsonToken.EndArray do
@@ -62,17 +62,17 @@ module Converters =
                         reader.Read() |> ignore
                 |]
 
-            let values = 
+            let values =
                 //TODO: make more flexible for variable length source and targets
                 Seq.zip jtokens types
-                |> Seq.map(fun (jtoken, ty) -> 
+                |> Seq.map(fun (jtoken, ty) ->
                     //printfn "jtoken = %A, ty = %A" (jtoken.ToString()) ty
                     jtoken.ToObject(ty, serializer))
                 |> Seq.toArray
 
             FSharpValue.MakeTuple (values, objType)
 
-        override __.WriteJson(writer, value, serializer) = 
+        override __.WriteJson(writer, value, serializer) =
             let values = FSharpValue.GetTupleFields value
             serializer.Serialize(writer, values)
 
@@ -89,7 +89,7 @@ module Converters =
             let caseInfo = caseInfos |> Array.tryFind (fun a -> a.Name = caseName)
             match caseInfo with
             | None -> failwithf "Couldn't find case '%s' on %A" caseName objType
-            | Some caseInfo -> 
+            | Some caseInfo ->
                 let fields = caseInfo.GetFields()
                 let fieldValues = System.Collections.Generic.Dictionary<string, obj>()
                 for property in properties.Properties() do
@@ -97,9 +97,9 @@ module Converters =
                     match field with
                     | Some f -> fieldValues.Add(property.Name, property.Value.ToObject(f.PropertyType, serializer))
                     | None -> fieldValues.Add(property.Name, null)
-                let values = 
-                    fields 
-                    |> Array.map (fun f -> 
+                let values =
+                    fields
+                    |> Array.map (fun f ->
                         match fieldValues.TryGetValue f.Name with
                         | true, v -> v
                         | _ -> null) //TODO: need more general default value (like None, 0, 0.0, etc. X.Empty)
@@ -118,19 +118,19 @@ module Converters =
             let fields = Seq.zip fieldNames values
             { UnionType = unionType
               CaseInfo = caseInfo
-              Name = caseInfo.Name 
+              Name = caseInfo.Name
               Fields = fields |> Seq.toList }
 
     /// A more lenient, extensible and less performant version of JSON.NET DiscriminatedUnionConverter.
-    type StorageDUJsonConverter() = 
+    type StorageDUJsonConverter() =
         inherit JsonConverter()
 
-        let readDuProperties (reader: JsonReader) = 
+        let readDuProperties (reader: JsonReader) =
             let mutable caseName = ""
             let mutable properties = JObject()
-            let jToken = JToken.ReadFrom reader 
+            let jToken = JToken.ReadFrom reader
             match jToken with
-            | :? JValue as jValue when jValue.Value = null -> 
+            | :? JValue as jValue when jValue.Value = null ->
                 null, null
             | _ ->
                 let jObj = jToken :?> JObject
@@ -142,7 +142,7 @@ module Converters =
                     jObj.Remove("Item1") |> ignore
                 properties <- jObj
                 caseName, properties
-            
+
         let writeDuBasic (writer:JsonWriter) (value:UnionCaseValue) (serializer:JsonSerializer) =
             writer.WriteStartObject()
             writer.WritePropertyName "Case"
@@ -156,33 +156,33 @@ module Converters =
                     writer.WritePropertyName name
                     serializer.Serialize(writer, value)
             writer.WriteEndObject()
-    
-        override __.WriteJson(writer, value, serializer) = 
+
+        override __.WriteJson(writer, value, serializer) =
             let value = UnionCaseValue.FromValue(value)
             writeDuBasic writer value serializer
-        
-        override __.ReadJson(reader, objType, _, serializer) = 
+
+        override __.ReadJson(reader, objType, _, serializer) =
             let caseName, properties = readDuProperties reader
             readDu objType serializer caseName properties
-        
-        override __.CanConvert(objType) = 
+
+        override __.CanConvert(objType) =
             canConvertDu objType
 
-    type ClientDUJsonConverter() = 
+    type ClientDUJsonConverter() =
         inherit JsonConverter()
-        let _duIsEnumLike (cases:UnionCaseInfo []) = 
-            cases 
+        let _duIsEnumLike (cases:UnionCaseInfo []) =
+            cases
             |> Seq.forall (fun case ->
                 case.GetFields() |> Array.isEmpty)
 
         let duIsEnumLike : UnionCaseInfo [] -> bool = memoize _duIsEnumLike
 
-        let readDuProperties (reader: JsonReader) = 
+        let readDuProperties (reader: JsonReader) =
             let mutable caseName = ""
             let mutable properties = JObject()
-            let jToken = JToken.ReadFrom reader 
+            let jToken = JToken.ReadFrom reader
             match jToken with
-            | :? JValue as jValue when jValue.Value = null -> 
+            | :? JValue as jValue when jValue.Value = null ->
                 null, null
             | _ ->
                 let jObj = jToken :?> JObject
@@ -196,7 +196,7 @@ module Converters =
                 properties <- jObj
                 caseName, properties
 
-        override __.WriteJson(writer, value, serializer) = 
+        override __.WriteJson(writer, value, serializer) =
             let value = UnionCaseValue.FromValue(value)
             let cases = getUnionCases(value.UnionType)
             let isEnumLike = duIsEnumLike cases
@@ -219,7 +219,7 @@ module Converters =
                         serializer.Serialize(writer, value)
                 writer.WriteEndObject()
 
-        override __.ReadJson(reader, objType, _, serializer) = 
+        override __.ReadJson(reader, objType, _, serializer) =
             let cases = getUnionCases(objType)
             let isEnumLike = duIsEnumLike cases
             if isEnumLike then
@@ -233,13 +233,46 @@ module Converters =
                 let caseName, properties = readDuProperties reader
                 readDu objType serializer caseName properties
 
-        override __.CanConvert(objType) = 
+        override __.CanConvert(objType) =
             canConvertDu objType
-  
+
+    exception JsonDeserializingNotSupportedException of string
+    type OneWayToJsonDUConverter() =
+        inherit JsonConverter()
+
+        let _caseIsEnumLike (case:UnionCaseInfo) =
+            case.GetFields() |> Array.isEmpty
+
+        let caseIsEnumLike : UnionCaseInfo -> bool = memoize _caseIsEnumLike
+
+        override __.WriteJson(writer, value, serializer) =
+            let value = UnionCaseValue.FromValue(value)
+            let isEnumLike = caseIsEnumLike value.CaseInfo
+            if isEnumLike then
+                writer.WriteValue(value.Name)
+            else
+                match value.Fields with
+                | [(name, value)] when name = "Item" -> //scalar, tuple types
+                    serializer.Serialize(writer, value)
+                | _ ->
+                    let values =
+                        value.Fields
+                        |> List.map (fun x ->
+                                let (_, value) = x
+                                value
+                            )
+                    serializer.Serialize(writer, values)
+
+        override __.ReadJson(_, _, _, _) =
+            raise (JsonDeserializingNotSupportedException "Reading JSON not supported with this serializer")
+
+        override __.CanConvert(objType) =
+            canConvertDu objType
+
   (* Example runtime schema-migrating converter
-  type CustomEventJsonConverter() = 
+  type CustomEventJsonConverter() =
     inherit DUJsonConverter()
-    override __.ParseCase caseName properties serializer objType = 
+    override __.ParseCase caseName properties serializer objType =
       match caseName with
       | "Foo" -> // Foo has been replaced by Bar
         let prop = properties.Property("someProperty").Value.ToObject(serializer)
