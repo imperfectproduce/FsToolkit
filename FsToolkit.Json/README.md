@@ -22,9 +22,10 @@ A set of `JsonConverter` implementations for better client and / or storage seri
   - `TupleConverter` serializes tuples as arrays, e.g. `(2, "3") -> [2, "3"]`
   - `StorageDUConverter` serializes DUs as flat objects with explicit fields names when given, and normalized auto-field names otherwise
   - `ClientDUConverter` serializes DUs as flat objects with explicit field names when given. "enum-like" DUs (all cases lack fields) are serialized as case-name strings. Single-field DUs without explicit field name are serialized with `value` field name.
+  - `OneWayToJsonDUConverter` serializes DUs as flat objects using only case values. "enum-like" cases are serialized as case-name strings.  This converter cannot be used to deserialize 
   
 ## FsToolkit.Json.Serialization
 
 An _opinionated_ set of helpers for serialization and deserializing exotic F# types.
 
-Distinguishes between three types of serialization targets: Client, Storage, and Transfer. Provides `ClientIgnore` and `StorageIgnore` attributes for controlling fields used in object serialization.
+Distinguishes between four types of serialization targets: Client, OneWayToClient, Storage, and Transfer. Provides `ClientIgnore` and `StorageIgnore` attributes for controlling fields used in object serialization.
