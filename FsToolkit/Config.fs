@@ -42,6 +42,8 @@ module Config =
              getAppSetting
              getIniSetting AppDomain.CurrentDomain.BaseDirectory "app.ini.local"
              getIniSetting Environment.CurrentDirectory "app.ini.local"
+             getIniSetting AppDomain.CurrentDomain.BaseDirectory "app.ini.secrets"
+             getIniSetting Environment.CurrentDirectory "app.ini.secrets"
              getIniSetting AppDomain.CurrentDomain.BaseDirectory "app.ini"
              getIniSetting Environment.CurrentDirectory "app.ini"]
             |> Seq.tryPick (fun getter -> getter(name))
