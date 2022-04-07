@@ -11,5 +11,6 @@ Here is the precedence from which settings are read:
 1. environment variables
 2. traditional `App.config`
 3. `app.ini.local` (intended for non-versioned local overrides)  
-4. `app.ini`
+4. `app.ini.secrets` (intended for script generate secrets)  
+5. `app.ini`
 

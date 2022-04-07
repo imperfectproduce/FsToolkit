@@ -16,5 +16,6 @@ Recommended workflow for publishing new package versions:
 
 ## Project-specific Readme's
 
+- [FsToolkit](https://github.com/relayfoods/FsToolkit/tree/master/FsToolkit)
 - [FsToolkit.Json](https://github.com/relayfoods/FsToolkit/tree/master/FsToolkit.Json)
 
