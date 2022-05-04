@@ -65,14 +65,8 @@ module AsyncResult =
         | Error x -> return Error x
     }
     
-    let mapError f r = async {
-        let! r = r
-        match r with
-        | Ok x -> return Ok x
-        | Error x ->
-            let! x' = f x
-            return Error(x')
-    }
+    let mapError (f: 'e1 -> 'e2) (asyncResult: Async<Result<'a, 'e1>>) : Async<Result<'a, 'e2>> =
+        Async.map (Result.mapError f) asyncResult
 
     let switch f x = async {
         let! x = f x
