@@ -64,6 +64,15 @@ module AsyncResult =
             return Ok(x')
         | Error x -> return Error x
     }
+    
+    let mapError f r = async {
+        let! r = r
+        match r with
+        | Ok x -> return Ok x
+        | Error x ->
+            let! x' = f x
+            return Error(x')
+    }
 
     let switch f x = async {
         let! x = f x
