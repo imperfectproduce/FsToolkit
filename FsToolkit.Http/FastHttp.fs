@@ -70,7 +70,7 @@ type FastResponse = {
     ///Raises an HttpRequestException with details about the FastResponse
     member this.Fail() =
         let msg = sprintf "The remote server response was rejected by caller: %i. Response from %s: %s" this.StatusCode this.RequestUrl this.Body
-        raise <| HttpRequestException(msg)
+        raise <| HttpRequestException(msg, null, enum<HttpStatusCode>(this.StatusCode))
     ///Raises an HttpRequestException is the StatusCode is outside of the 200-range
     member this.Ensure2xx() =
         if this.Is2xx |> not then
