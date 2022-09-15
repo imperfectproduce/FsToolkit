@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Imperfect.FsToolkit.Http</id>
-    <version>6.0.0</version>
+    <version>6.1.0</version>
     <description>Http helpers, mostly built on top of HttpClient</description>
     <authors>Imperfect Foods</authors>
     <license type="expression">MIT</license>
